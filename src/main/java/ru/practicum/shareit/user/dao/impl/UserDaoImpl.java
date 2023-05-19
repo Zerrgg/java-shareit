@@ -47,9 +47,8 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public User findById(Long id) {
-        if (!users.containsKey(id)) throw new UserNotFoundException(USER_NOT_FOUND_MESSAGE + id);
-        return users.get(id);
+    public Optional<User> findById(Long id) {
+        return Optional.ofNullable(users.get(id));
     }
 
     @Override
@@ -77,7 +76,7 @@ public class UserDaoImpl implements UserDao {
         emails.add(newEmail);
     }
 
-    private long generateId() {
+    private Long generateId() {
         return currentId++;
     }
 }

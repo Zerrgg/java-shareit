@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.dao;
 import ru.practicum.shareit.item.Item;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ItemDao {
 
@@ -10,9 +11,9 @@ public interface ItemDao {
 
     Item update(Item item);
 
-    Item findById(Long id);
+    Optional<Item> findById(Long id);
 
-    List<Item> findAll(Long userId);
+    List<Item> findAllByUserId(Long userId);
 
-    List<Item> findByRequest(String text);
+    List<Item> findItemsByUserRequest(String text);
 }
