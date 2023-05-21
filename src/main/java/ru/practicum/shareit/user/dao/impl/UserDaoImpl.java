@@ -1,13 +1,15 @@
 package ru.practicum.shareit.user.dao.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.EmailConflictException;
-import ru.practicum.shareit.exception.UserNotFoundException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.User;
 
 import java.util.*;
 
+@Slf4j
 @Repository
 public class UserDaoImpl implements UserDao {
     public static final String USER_NOT_FOUND_MESSAGE = "не найден пользователь с id: ";
@@ -29,7 +31,8 @@ public class UserDaoImpl implements UserDao {
     @Override
     public User update(Long id, User user) {
         if (!users.containsKey(id)) {
-            throw new UserNotFoundException(USER_NOT_FOUND_MESSAGE + id);
+            log.warn("Не найден пользователь с id: {}", id);
+            throw new NotFoundException(USER_NOT_FOUND_MESSAGE + id);
         }
         User oldEntry = users.get(id);
 
@@ -53,7 +56,10 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void delete(Long id) {
-        if (!users.containsKey(id)) throw new UserNotFoundException(USER_NOT_FOUND_MESSAGE + id);
+        if (!users.containsKey(id)) {
+            log.warn("Не найден пользователь с id: {}", id);
+            throw new NotFoundException(USER_NOT_FOUND_MESSAGE + id);
+        }
         emails.remove(users.get(id).getEmail());
         users.remove(id);
     }
@@ -64,13 +70,17 @@ public class UserDaoImpl implements UserDao {
     }
 
     private void checkEmail(String email) {
-        if (emails.contains(email)) throw new EmailConflictException(EMAIL_CONFLICT_MESSAGE + email);
+        if (emails.contains(email)) {
+            log.warn("email-\"{}\" уже используется другим пользователем: ", email);
+            throw new EmailConflictException(EMAIL_CONFLICT_MESSAGE + email);
+        }
     }
 
     private void updateEmail(String oldEmail, String newEmail) {
         emails.remove(oldEmail);
         if (emails.contains(newEmail)) {
             emails.add(oldEmail);
+            log.warn("email-\"{}\" уже используется другим пользователем: ", newEmail);
             throw new EmailConflictException(EMAIL_CONFLICT_MESSAGE + newEmail);
         }
         emails.add(newEmail);

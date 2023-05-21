@@ -1,14 +1,16 @@
 package ru.practicum.shareit.item.dao.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.DeniedAccessException;
-import ru.practicum.shareit.exception.ItemNotFoundException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.Item;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Repository
 public class ItemDaoImpl implements ItemDao {
 
@@ -39,15 +41,18 @@ public class ItemDaoImpl implements ItemDao {
     @Override
     public Item update(Item item) {
 
-        if (!items.containsKey(item.getId()))
-            throw new ItemNotFoundException("Не найдена вещь с id: " + item.getId());
-
+        if (!items.containsKey(item.getId())) {
+            log.warn("Не найдена вещь с id: {}", item.getId());
+            throw new NotFoundException(String.format(
+                    "Не найдена вещь с id: %d", item.getId()));
+        }
         Item updatedItem = items.get(item.getId());
 
-        if (!updatedItem.getOwner().equals(item.getOwner()))
-            throw new DeniedAccessException("Пользователь не является владельцем вещи" +
-                    "userId: " + item.getOwner() + ", itemId: " + item.getId());
-
+        if (!updatedItem.getOwner().equals(item.getOwner())) {
+            log.warn("Пользователь не является владельцем вещи userId: {} , itemId: {}", item.getOwner(), item.getId());
+            throw new DeniedAccessException(String.format(
+                    "Пользователь не является владельцем вещи userId: %d, itemId: %d", item.getOwner(), item.getId()));
+        }
         updateItem(updatedItem, item);
         return updatedItem;
     }

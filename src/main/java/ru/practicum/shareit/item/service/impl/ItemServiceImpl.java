@@ -1,11 +1,10 @@
 package ru.practicum.shareit.item.service.impl;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import ru.practicum.shareit.exception.ItemNotFoundException;
-import ru.practicum.shareit.exception.OwnerNotFoundException;
-import ru.practicum.shareit.exception.UserNotFoundException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.Item;
@@ -18,47 +17,58 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
-    public static final String OWNER_NOT_FOUND = "Не найден владелец c id: ";
+    public static final String OWNER_NOT_FOUND_MESSAGE = "Не найден владелец c id: ";
 
     private final ItemDao itemDao;
     private final UserDao userDao;
-    private final ItemMapper itemMapper;
 
     @Override
     public ItemDto add(ItemDto itemDto, Long userId) {
         boolean ownerExists = checkOwner(userId);
         if (!ownerExists) {
-            throw new OwnerNotFoundException(OWNER_NOT_FOUND + userId);
+            log.warn("Не найден владелец c id-{}: ", userId);
+            throw new NotFoundException(OWNER_NOT_FOUND_MESSAGE + userId);
         }
-        Item item = itemMapper.toItem(itemDto, userId);
+        Item item = ItemMapper.toItem(itemDto, userId);
         item.setOwner(userId);
-        return itemMapper.toItemDto(itemDao.add(item));
+        return ItemMapper.toItemDto(itemDao.add(item));
     }
 
     @Override
     public ItemDto update(ItemDto itemDto, Long itemId, Long userId) {
-        Item item = itemMapper.toItem(itemDto, userId);
+        Item item = ItemMapper.toItem(itemDto, userId);
         item.setId(itemId);
-        return itemMapper.toItemDto(itemDao.update(item));
+        return ItemMapper.toItemDto(itemDao.update(item));
     }
 
     @Override
     public ItemDto findById(Long id) {
-        return itemMapper.toItemDto(itemDao.findById(id)
-                .orElseThrow(() -> new ItemNotFoundException("Не найдена вещь с id: " + id)));
+        Item item = itemDao.findById(id)
+                .orElseThrow(() -> {
+                            log.warn("Не найдена вещь с id-{}: ", id);
+                            return new NotFoundException(String.format(
+                                    "Не найдена вещь с id: %d", id));
+                        }
+                );
+        return ItemMapper.toItemDto(item);
     }
 
     @Override
     public List<ItemDto> findAllByUserId(Long userId) {
         userDao.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("не найден пользователь с id: " + userId));
+                .orElseThrow(() -> {
+                            log.warn("Не найден пользователь с id: {}", userId);
+                            return new NotFoundException(String.format("Не найден пользователь с id: %d", userId));
+                        }
+                );
         return itemDao.findAllByUserId(userId)
                 .stream()
-                .map(itemMapper::toItemDto)
+                .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
@@ -69,7 +79,7 @@ public class ItemServiceImpl implements ItemService {
         }
         return itemDao.findItemsByUserRequest(text)
                 .stream()
-                .map(itemMapper::toItemDto)
+                .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
