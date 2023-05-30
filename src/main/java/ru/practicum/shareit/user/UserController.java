@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exception.markers.Create;
 import ru.practicum.shareit.exception.markers.Update;
 import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserDTO;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -24,14 +24,14 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public UserDto add(@Validated({Create.class})
-                       @RequestBody UserDto userDto) {
+    public UserDTO add(@Validated({Create.class})
+                       @RequestBody UserDTO userDto) {
         log.info("POST Запрос на добавление пользователя {}", userDto);
         return userService.add(userDto);
     }
 
     @GetMapping("/{userId}")
-    public UserDto findById(@NotNull(message = (NULL_USER_ID_MESSAGE))
+    public UserDTO findById(@NotNull(message = (NULL_USER_ID_MESSAGE))
                             @Positive
                             @PathVariable Long userId) {
         log.info("GET Запрос на получение пользователя по id-{}", userId);
@@ -39,17 +39,17 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDto> findAll() {
+    public List<UserDTO> findAll() {
         log.info("GET Запрос на получение всех пользователей");
         return userService.findAll();
     }
 
     @PatchMapping("/{userId}")
-    public UserDto update(@NotNull(message = (NULL_USER_ID_MESSAGE))
+    public UserDTO update(@NotNull(message = (NULL_USER_ID_MESSAGE))
                           @Positive
                           @PathVariable Long userId,
                           @Validated({Update.class})
-                          @RequestBody UserDto userDto) {
+                          @RequestBody UserDTO userDto) {
         log.info("PATCH Запрос на обновление пользователя по id-{}", userId);
         return userService.update(userId, userDto);
     }

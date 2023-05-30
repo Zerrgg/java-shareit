@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.dao.UserDao;
+import ru.practicum.shareit.user.dao.UserDAO;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserDTO;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
@@ -18,19 +18,19 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private UserDao userDao;
+    private UserDAO userDao;
 
-    public UserDto add(UserDto userDto) {
+    public UserDTO add(UserDTO userDto) {
         User user = UserMapper.toUser(userDto, userDto.getId());
         return UserMapper.toUserDto(userDao.add(user));
     }
 
-    public UserDto update(Long id, UserDto userDto) {
+    public UserDTO update(Long id, UserDTO userDto) {
         User user = UserMapper.toUser(userDto, id);
         return UserMapper.toUserDto(userDao.update(id, user));
     }
 
-    public UserDto findById(Long id) {
+    public UserDTO findById(Long id) {
         User user = userDao.findById(id)
                 .orElseThrow(() -> {
                             log.warn("Не найден пользователь с id: {}", id);
@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
         userDao.delete(id);
     }
 
-    public List<UserDto> findAll() {
+    public List<UserDTO> findAll() {
         return userDao.findAll()
                 .stream()
                 .map(UserMapper::toUserDto)

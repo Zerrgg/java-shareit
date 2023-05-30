@@ -5,7 +5,7 @@ import ru.practicum.shareit.item.Item;
 import java.util.List;
 import java.util.Optional;
 
-public interface ItemDao {
+public interface ItemDAO {
 
     Item add(Item item);
 

@@ -6,11 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemMapper;
-import ru.practicum.shareit.item.dao.ItemDao;
+import ru.practicum.shareit.item.dao.ItemDAO;
 import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDTO;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.dao.UserDao;
+import ru.practicum.shareit.user.dao.UserDAO;
 import ru.practicum.shareit.user.User;
 
 import java.util.ArrayList;
@@ -24,11 +24,11 @@ public class ItemServiceImpl implements ItemService {
 
     public static final String OWNER_NOT_FOUND_MESSAGE = "Не найден владелец c id: ";
 
-    private final ItemDao itemDao;
-    private final UserDao userDao;
+    private final ItemDAO itemDao;
+    private final UserDAO userDao;
 
     @Override
-    public ItemDto add(ItemDto itemDto, Long userId) {
+    public ItemDTO add(ItemDTO itemDto, Long userId) {
         boolean ownerExists = checkOwner(userId);
         if (!ownerExists) {
             log.warn("Не найден владелец c id-{}: ", userId);
@@ -40,14 +40,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto update(ItemDto itemDto, Long itemId, Long userId) {
+    public ItemDTO update(ItemDTO itemDto, Long itemId, Long userId) {
         Item item = ItemMapper.toItem(itemDto, userId);
         item.setId(itemId);
         return ItemMapper.toItemDto(itemDao.update(item));
     }
 
     @Override
-    public ItemDto findById(Long id) {
+    public ItemDTO findById(Long id) {
         Item item = itemDao.findById(id)
                 .orElseThrow(() -> {
                             log.warn("Не найдена вещь с id-{}: ", id);
@@ -59,7 +59,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> findAllByUserId(Long userId) {
+    public List<ItemDTO> findAllByUserId(Long userId) {
         userDao.findById(userId)
                 .orElseThrow(() -> {
                             log.warn("Не найден пользователь с id: {}", userId);
@@ -73,7 +73,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> findItemsByUserRequest(String text) {
+    public List<ItemDTO> findItemsByUserRequest(String text) {
         if (!StringUtils.hasLength(text)) {
             return new ArrayList<>();
         }

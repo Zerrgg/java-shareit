@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.DeniedAccessException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dao.ItemDao;
+import ru.practicum.shareit.item.dao.ItemDAO;
 import ru.practicum.shareit.item.Item;
 
 import java.util.*;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
-public class ItemDaoImpl implements ItemDao {
+public class ItemDAOImpl implements ItemDAO {
 
     private final Map<Long, Item> items = new HashMap<>();
     private long currentId = 1;

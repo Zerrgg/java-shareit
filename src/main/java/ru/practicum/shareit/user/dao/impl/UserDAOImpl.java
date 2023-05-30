@@ -4,14 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.EmailConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.dao.UserDao;
+import ru.practicum.shareit.user.dao.UserDAO;
 import ru.practicum.shareit.user.User;
 
 import java.util.*;
 
 @Slf4j
 @Repository
-public class UserDaoImpl implements UserDao {
+public class UserDAOImpl implements UserDAO {
     public static final String USER_NOT_FOUND_MESSAGE = "не найден пользователь с id: ";
     public static final String EMAIL_CONFLICT_MESSAGE = "email уже используется другим пользователем: ";
 

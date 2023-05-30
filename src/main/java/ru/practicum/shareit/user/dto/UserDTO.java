@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @Builder
 @AllArgsConstructor
-public class UserDto {
+public class UserDTO {
     private Long id;
     @NotNull(groups = {Create.class})
     private String name;
