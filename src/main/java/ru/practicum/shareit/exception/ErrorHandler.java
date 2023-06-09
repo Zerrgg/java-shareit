@@ -25,29 +25,48 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(EmailConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handle(EmailConflictException e) {
+    public ErrorResponse handleEmailConflictException(EmailConflictException e) {
         log.debug("Адрес почты уже используется {}", e.getMessage());
         return new ErrorResponse("Адрес почты уже используется", e.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handle(NotFoundException e) {
-        log.debug("Недопустимое значение id {}", e.getMessage());
-        return new ErrorResponse("Недопустимое значение id", e.getMessage());
+    public ErrorResponse handleNotFoundException(NotFoundException e) {
+        log.debug("Недопустимое значение {}", e.getMessage());
+        return new ErrorResponse("Недопустимое значение {}", e.getMessage());
     }
 
     @ExceptionHandler(DeniedAccessException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handle(DeniedAccessException e) {
+    public ErrorResponse handleDeniedAccessException(DeniedAccessException e) {
         log.debug("Отказано в доступе {}", e.getMessage());
         return new ErrorResponse("Отказано в доступе", e.getMessage());
     }
 
     @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handle(Throwable e) {
-        log.debug("Получен статус 404 Not found {}", e.getMessage());
+    public ErrorResponse handleThrowable(Throwable e) {
+        log.debug("Непредвиденная ошибка {}", e.getMessage());
         return new ErrorResponse("Непредвиденная ошибка {}", e.getMessage());
     }
+
+    @ExceptionHandler(ValidateBookingException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleUnavailableBookingException(ValidateBookingException e) {
+        return new ErrorResponse("Ошибка бронирования 400: ", e.getMessage());
+    }
+
+    @ExceptionHandler(UnknownBookingException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleUnknownBookingException(UnknownBookingException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler({ValidateCommentException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleCommentException(ValidateCommentException e) {
+        return new ErrorResponse("Невозможно оставить комментарий 400: ", e.getMessage());
+    }
+
 }

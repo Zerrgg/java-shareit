@@ -1,26 +1,49 @@
 package ru.practicum.shareit.item;
 
 import lombok.experimental.UtilityClass;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingMapper;
+import ru.practicum.shareit.comment.Comment;
+import ru.practicum.shareit.comment.CommentMapper;
 import ru.practicum.shareit.item.dto.ItemDTO;
+
+import java.util.List;
 
 @UtilityClass
 public class ItemMapper {
-    public static ItemDTO toItemDto(Item item) {
-        return new ItemDTO(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                item.getRequestId() != null ? item.getRequestId() : null);
+    public ItemDTO toItemDTO(Item item, List<Comment> comments) {
+        ItemDTO itemDTO = new ItemDTO();
+        itemDTO.setId(item.getId());
+        itemDTO.setName(item.getName());
+        itemDTO.setDescription(item.getDescription());
+        itemDTO.setAvailable(item.getAvailable());
+        if (comments != null) {
+            itemDTO.setComments(CommentMapper.toCommentDtoList(comments));
+        }
+        return itemDTO;
     }
 
-    public static Item toItem(ItemDTO itemDto, Long ownerId) {
-        return new Item(
-                itemDto.getId(),
-                itemDto.getName(),
-                itemDto.getDescription(),
-                itemDto.getAvailable(),
-                ownerId,
-                itemDto.getRequestId() != null ? itemDto.getRequestId() : null);
+    public ItemDTO toItemDTO(Item item, Booking lastBooking, Booking nextBooking, List<Comment> comments) {
+        ItemDTO itemDTO = new ItemDTO();
+        itemDTO.setId(item.getId());
+        itemDTO.setName(item.getName());
+        itemDTO.setDescription(item.getDescription());
+        itemDTO.setAvailable(item.getAvailable());
+        itemDTO.setLastBooking(BookingMapper.bookingItemDTO(lastBooking));
+        itemDTO.setNextBooking(BookingMapper.bookingItemDTO(nextBooking));
+        if (comments != null) {
+            itemDTO.setComments(CommentMapper.toCommentDtoList(comments));
+        }
+        return itemDTO;
     }
+
+    public Item toItem(ItemDTO itemDTO, Long ownerId) {
+        return new Item(
+                itemDTO.getId(),
+                itemDTO.getName(),
+                itemDTO.getDescription(),
+                itemDTO.getAvailable(),
+                ownerId);
+    }
+
 }

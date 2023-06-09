@@ -7,16 +7,16 @@ import ru.practicum.shareit.exception.markers.Create;
 import ru.practicum.shareit.exception.markers.Update;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
 @Data
 @Builder
 @AllArgsConstructor
 public class UserDTO {
     private Long id;
-    @NotNull(groups = {Create.class})
+    @NotBlank(groups = {Create.class})
     private String name;
     @Email(groups = {Create.class, Update.class})
-    @NotNull(groups = {Create.class})
+    @NotBlank(groups = {Create.class})
     private String email;
 }

@@ -1,11 +1,11 @@
 package ru.practicum.shareit.user.service.impl;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.dao.UserDAO;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDTO;
 import ru.practicum.shareit.user.service.UserService;
@@ -15,40 +15,55 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private UserDAO userDao;
+    private final UserRepository userRepository;
 
-    public UserDTO add(UserDTO userDto) {
-        User user = UserMapper.toUser(userDto, userDto.getId());
-        return UserMapper.toUserDto(userDao.add(user));
+    public UserDTO createUser(UserDTO userDTO) {
+        User user = UserMapper.toUser(userDTO);
+        return UserMapper.toUserDTO(userRepository.save(user));
     }
 
-    public UserDTO update(Long id, UserDTO userDto) {
-        User user = UserMapper.toUser(userDto, id);
-        return UserMapper.toUserDto(userDao.update(id, user));
+    public UserDTO updateUser(Long userId, UserDTO userDTO) {
+        User user = patchUser(userDTO, userId);
+        return UserMapper.toUserDTO(userRepository.save(user));
     }
 
-    public UserDTO findById(Long id) {
-        User user = userDao.findById(id)
+    public UserDTO findUserById(Long id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> {
                             log.warn("Не найден пользователь с id: {}", id);
                             return new NotFoundException(String.format("не найден пользователь с id: %d", id));
                         }
                 );
-        return UserMapper.toUserDto(user);
+        return UserMapper.toUserDTO(user);
     }
 
-    public void delete(Long id) {
-        userDao.delete(id);
+    public void deleteUserById(Long id) {
+        userRepository.deleteById(id);
     }
 
-    public List<UserDTO> findAll() {
-        return userDao.findAll()
+    public List<UserDTO> findAllUsers() {
+        return userRepository.findAll()
                 .stream()
-                .map(UserMapper::toUserDto)
+                .map(UserMapper::toUserDTO)
                 .collect(Collectors.toList());
+    }
+
+    private User patchUser(UserDTO patch, Long userId) {
+        UserDTO entry = findUserById(userId);
+        String name = patch.getName();
+        if (name != null && !name.isBlank()) {
+            entry.setName(name);
+        }
+
+        String oldEmail = entry.getEmail();
+        String newEmail = patch.getEmail();
+        if (newEmail != null && !newEmail.isBlank() && !oldEmail.equals(newEmail)) {
+            entry.setEmail(newEmail);
+        }
+        return UserMapper.toUser(entry);
     }
 
 }

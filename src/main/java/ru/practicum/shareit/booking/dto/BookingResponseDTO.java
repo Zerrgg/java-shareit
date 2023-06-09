@@ -7,15 +7,11 @@ import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 
-import java.time.LocalDateTime;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookingDTO {
+public class BookingResponseDTO {
     private Long id;
-    private LocalDateTime start;
-    private LocalDateTime end;
     private BookingStatus status;
     private User booker;
     private Item item;
