@@ -6,17 +6,19 @@ import ru.practicum.shareit.user.dto.UserDTO;
 @UtilityClass
 public class UserMapper {
 
-    public UserDTO toUserDTO(User user) {
-        return new UserDTO(
-                user.getId(),
-                user.getName(),
-                user.getEmail());
+    public static UserDTO toUserDTO(User user) {
+        return UserDTO.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .build();
     }
 
-    public User toUser(UserDTO userDTO) {
-        return new User(
-                userDTO.getId(),
-                userDTO.getName(),
-                userDTO.getEmail());
+    public static User toUser(UserDTO userDTO) {
+        return User.builder()
+                .id(userDTO.getId())
+                .name(userDTO.getName())
+                .email(userDTO.getEmail())
+                .build();
     }
 }

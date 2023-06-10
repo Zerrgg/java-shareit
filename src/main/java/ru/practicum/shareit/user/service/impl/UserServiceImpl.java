@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -20,16 +21,21 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
+    @Override
     public UserDTO createUser(UserDTO userDTO) {
         User user = UserMapper.toUser(userDTO);
-        return UserMapper.toUserDTO(userRepository.save(user));
+        user = userRepository.save(user);
+        return UserMapper.toUserDTO(user);
     }
 
+    @Override
     public UserDTO updateUser(Long userId, UserDTO userDTO) {
         User user = patchUser(userDTO, userId);
-        return UserMapper.toUserDTO(userRepository.save(user));
+        user = userRepository.save(user);
+        return UserMapper.toUserDTO(user);
     }
 
+    @Override
     public UserDTO findUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> {
@@ -40,10 +46,12 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toUserDTO(user);
     }
 
+    @Override
     public void deleteUserById(Long id) {
         userRepository.deleteById(id);
     }
 
+    @Override
     public List<UserDTO> findAllUsers() {
         return userRepository.findAll()
                 .stream()
@@ -54,13 +62,13 @@ public class UserServiceImpl implements UserService {
     private User patchUser(UserDTO patch, Long userId) {
         UserDTO entry = findUserById(userId);
         String name = patch.getName();
-        if (name != null && !name.isBlank()) {
+        if (StringUtils.hasText(name)) {
             entry.setName(name);
         }
 
         String oldEmail = entry.getEmail();
         String newEmail = patch.getEmail();
-        if (newEmail != null && !newEmail.isBlank() && !oldEmail.equals(newEmail)) {
+        if (StringUtils.hasText(newEmail) && !oldEmail.equals(newEmail)) {
             entry.setEmail(newEmail);
         }
         return UserMapper.toUser(entry);

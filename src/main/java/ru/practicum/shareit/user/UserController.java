@@ -18,12 +18,11 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
 
-
     private final UserService userService;
 
     @PostMapping
     public UserDTO createUser(@Validated({Create.class})
-                       @RequestBody UserDTO userDto) {
+                              @RequestBody UserDTO userDto) {
         log.info("POST Запрос на добавление пользователя {}", userDto);
         return userService.createUser(userDto);
     }

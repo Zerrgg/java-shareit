@@ -1,40 +1,40 @@
 package ru.practicum.shareit.comment;
 
 import lombok.experimental.UtilityClass;
-import ru.practicum.shareit.comment.dto.AddCommentDTO;
 import ru.practicum.shareit.comment.dto.CommentDTO;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @UtilityClass
 public class CommentMapper {
-    public Comment toComment(AddCommentDTO addCommentDTO, Item item, User author) {
-        Comment comment = new Comment();
-        comment.setText(addCommentDTO.getText());
-        comment.setItem(item);
-        comment.setAuthor(author);
-        comment.setCreated(LocalDateTime.now());
-        return comment;
+    public static Comment toComment(CommentDTO commentDTO, Item item, User author) {
+        return Comment.builder()
+                .id(commentDTO.getId())
+                .text(commentDTO.getText())
+                .item(item)
+                .author(author)
+                .created(commentDTO.getCreated())
+                .build();
     }
 
-    public CommentDTO toCommentDTO(Comment comment) {
-        CommentDTO commentDTO = new CommentDTO();
-        commentDTO.setId(comment.getId());
-        commentDTO.setText(comment.getText());
-        commentDTO.setAuthorName(comment.getAuthor().getName());
-        commentDTO.setCreated(comment.getCreated());
-        return commentDTO;
+    public static CommentDTO toCommentDTO(Comment comment) {
+        return CommentDTO.builder()
+                .id(comment.getId())
+                .text(comment.getText())
+                .authorName(comment.getAuthor().getName())
+                .created(comment.getCreated())
+                .itemId(comment.getItem().getId())
+                .build();
     }
 
-    public static List<CommentDTO> toCommentDtoList(List<Comment> comments) {
+    public static List<CommentDTO> toDTOList(List<Comment> comments) {
         return comments
                 .stream()
                 .map(CommentMapper::toCommentDTO)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
-
 }

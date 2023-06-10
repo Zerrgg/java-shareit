@@ -4,10 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.comment.dto.AddCommentDTO;
 import ru.practicum.shareit.comment.dto.CommentDTO;
 import ru.practicum.shareit.exception.markers.Create;
-import ru.practicum.shareit.exception.markers.Update;
 import ru.practicum.shareit.item.dto.ItemDTO;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -40,7 +38,8 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDTO findItemById(@PathVariable Long itemId, @RequestHeader(USER_ID_HEADER) Long userId) {
+    public ItemDTO findItemById(@PathVariable Long itemId,
+                                @RequestHeader(USER_ID_HEADER) Long userId) {
         log.info("GET Запрос поиска предмета-{} пользователя c id-{} ", itemId, userId);
         return itemService.findItemById(itemId, userId);
     }
@@ -52,17 +51,18 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDTO> findItemByRequest(@RequestParam String text, @RequestHeader(USER_ID_HEADER) Long userId) {
+    public List<ItemDTO> findItemByRequest(@RequestParam String text,
+                                           @RequestHeader(USER_ID_HEADER) Long userId) {
         log.info("GET Запрос на поиск предметов по запросу-{} от пользователя-{}", text, userId);
         return itemService.findItemsByRequest(text, userId);
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDTO addComment(@Validated({Update.class})
-                                 @RequestBody AddCommentDTO addCommentDTO,
+    public CommentDTO addComment(@Validated(Create.class)
+                                 @RequestBody CommentDTO commentDTO,
                                  @PathVariable Long itemId,
                                  @RequestHeader(USER_ID_HEADER) Long userId) {
-        log.info("POST Запрос от пользователя с id-{} на добавление комментария-{} к предмету с i-{}", userId, addCommentDTO, itemId);
-        return itemService.addComment(addCommentDTO, itemId, userId);
+        log.info("POST Запрос от пользователя с id-{} на добавление комментария-{} к предмету с i-{}", userId, commentDTO, itemId);
+        return itemService.addComment(commentDTO, itemId, userId);
     }
 }
