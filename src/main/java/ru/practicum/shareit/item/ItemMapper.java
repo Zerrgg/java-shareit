@@ -1,26 +1,54 @@
 package ru.practicum.shareit.item;
 
 import lombok.experimental.UtilityClass;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.booking.dto.BookingDTO;
+import ru.practicum.shareit.comment.dto.CommentDTO;
+import ru.practicum.shareit.item.dto.ItemDTO;
+import ru.practicum.shareit.user.User;
+
+import java.util.List;
 
 @UtilityClass
 public class ItemMapper {
-    public static ItemDto toItemDto(Item item) {
-        return new ItemDto(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                item.getRequestId() != null ? item.getRequestId() : null);
+    public static ItemDTO toItemDTO(Item item, List<CommentDTO> comments) {
+        return ItemDTO.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .comments(comments)
+                .build();
     }
 
-    public static Item toItem(ItemDto itemDto, Long ownerId) {
-        return new Item(
-                itemDto.getId(),
-                itemDto.getName(),
-                itemDto.getDescription(),
-                itemDto.getAvailable(),
-                ownerId,
-                itemDto.getRequestId() != null ? itemDto.getRequestId() : null);
+    public static ItemDTO toItemDTO(Item item, BookingDTO lastBooking, BookingDTO nextBooking, List<CommentDTO> comments) {
+        return ItemDTO.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .lastBooking(lastBooking)
+                .nextBooking(nextBooking)
+                .comments(comments)
+                .build();
     }
+
+    public static Item toItem(ItemDTO itemDTO, User owner) {
+        return Item.builder()
+                .id(itemDTO.getId())
+                .name(itemDTO.getName())
+                .description(itemDTO.getDescription())
+                .available(itemDTO.getAvailable())
+                .owner(owner)
+                .build();
+    }
+
+    public static ItemDTO toItemDTO(Item item) {
+        return ItemDTO.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .build();
+    }
+
 }
