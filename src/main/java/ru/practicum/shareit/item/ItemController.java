@@ -6,17 +6,24 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.comment.dto.CommentDTO;
 import ru.practicum.shareit.exception.markers.Create;
+import ru.practicum.shareit.exception.markers.Update;
 import ru.practicum.shareit.item.dto.ItemDTO;
 import ru.practicum.shareit.item.service.ItemService;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Slf4j
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/items")
 public class ItemController {
 
+    public static final String DEFAULT_FROM_VALUE = "0";
+    public static final String DEFAULT_SIZE_VALUE = "20";
     public static final String USER_ID_HEADER = "X-Sharer-User-Id";
 
     private final ItemService itemService;
@@ -30,7 +37,8 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDTO updateItem(@RequestBody ItemDTO itemDto,
+    public ItemDTO updateItem(@Validated({Update.class})
+                              @RequestBody ItemDTO itemDto,
                               @PathVariable Long itemId,
                               @RequestHeader(USER_ID_HEADER) Long userId) {
         log.info("PATCH Запрос на обновление предмета по id-{} пользователем c id-{}", itemId, userId);
@@ -45,16 +53,27 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDTO> findAllItemByUserId(@RequestHeader(USER_ID_HEADER) Long userId) {
+    public List<ItemDTO> findAllItemByUserId(@RequestHeader(USER_ID_HEADER) Long userId,
+                                             @RequestParam(defaultValue = DEFAULT_FROM_VALUE)
+                                             @PositiveOrZero
+                                             int from,
+                                             @RequestParam(defaultValue = DEFAULT_SIZE_VALUE)
+                                             @Positive
+                                             int size) {
         log.info("GET Запрос на поиск предметов пользователя c id-{}", userId);
-        return itemService.findAllItemsByUserId(userId);
+        return itemService.findAllItemsByUserId(userId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemDTO> findItemByRequest(@RequestParam String text,
-                                           @RequestHeader(USER_ID_HEADER) Long userId) {
-        log.info("GET Запрос на поиск предметов по запросу-{} от пользователя-{}", text, userId);
-        return itemService.findItemsByRequest(text, userId);
+    public List<ItemDTO> findItemsByRequest(@RequestParam String text,
+                                            @RequestParam(defaultValue = DEFAULT_FROM_VALUE)
+                                            @PositiveOrZero
+                                            int from,
+                                            @RequestParam(defaultValue = DEFAULT_SIZE_VALUE)
+                                            @Positive
+                                            int size) {
+        log.info("GET Запрос на поиск предметов по запросу-{} от пользователя", text);
+        return itemService.findItemsByRequest(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

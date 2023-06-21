@@ -13,9 +13,9 @@ public interface ItemService {
 
     ItemDTO findItemById(Long itemId, Long userId);
 
-    List<ItemDTO> findAllItemsByUserId(Long userId);
+    List<ItemDTO> findAllItemsByUserId(Long userId, int from, int size);
 
-    List<ItemDTO> findItemsByRequest(String text, Long userId);
+    List<ItemDTO> findItemsByRequest(String text, int from, int size);
 
     CommentDTO addComment(CommentDTO commentDTO, Long itemId, Long userId);
 }

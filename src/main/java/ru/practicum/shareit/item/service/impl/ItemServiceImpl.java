@@ -1,7 +1,8 @@
 package ru.practicum.shareit.item.service.impl;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -33,8 +34,7 @@ import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
-@AllArgsConstructor
-
+@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
@@ -69,7 +69,7 @@ public class ItemServiceImpl implements ItemService {
         updatedItem.setId(itemId);
         List<CommentDTO> comments = CommentMapper.toDTOList(commentRepository.findAllByItemOrderByIdAsc(item));
         updatedItem = itemRepository.save(refreshItem(updatedItem));
-        return ItemMapper.toItemDTO(updatedItem, comments);
+        return ItemMapper.toItemWithCommentsDTO(updatedItem, comments);
     }
 
     @Override
@@ -89,21 +89,22 @@ public class ItemServiceImpl implements ItemService {
         boolean trueOwner = item.getOwner().getId().equals(userId);
 
         if (trueOwner) {
-            return ItemMapper.toItemDTO(
+            return ItemMapper.toItemWithBookingDTO(
                     item,
                     getLastBooking(bookingDTOList),
                     getNextBooking(bookingDTOList),
                     comments);
         }
 
-        return ItemMapper.toItemDTO(item, comments);
+        return ItemMapper.toItemWithCommentsDTO(item, comments);
     }
 
     @Override
     @Transactional
-    public List<ItemDTO> findAllItemsByUserId(Long userId) {
+    public List<ItemDTO> findAllItemsByUserId(Long userId, int from, int size) {
         checkUser(userId);
-        List<Item> userItems = itemRepository.findAllByOwnerId(userId);
+        PageRequest pageRequest = PageRequest.of(from / size, size);
+        List<Item> userItems = itemRepository.findAllByOwnerId(userId, pageRequest);
         Map<Long, List<CommentDTO>> comments = commentRepository.findByItemIn(userItems)
                 .stream()
                 .map(CommentMapper::toCommentDTO)
@@ -116,7 +117,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(groupingBy(BookingDTO::getItemId, toList()));
         return userItems
                 .stream()
-                .map(item -> ItemMapper.toItemDTO(
+                .map(item -> ItemMapper.toItemWithBookingDTO(
                         item,
                         getLastBooking(bookings.get(item.getId())),
                         getNextBooking(bookings.get(item.getId())),
@@ -127,13 +128,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public List<ItemDTO> findItemsByRequest(String text, Long userId) {
-        checkUser(userId);
+    public List<ItemDTO> findItemsByRequest(String text, int from, int size) {
         if (!StringUtils.hasText(text)) {
             return Collections.emptyList();
         }
-
-        return itemRepository.search(text)
+        PageRequest pageRequest = PageRequest.of(from / size, size);
+        return itemRepository.search(text, pageRequest)
                 .stream()
                 .map(ItemMapper::toItemDTO)
                 .collect(toList());
