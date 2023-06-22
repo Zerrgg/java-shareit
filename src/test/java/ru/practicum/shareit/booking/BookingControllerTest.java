@@ -56,7 +56,7 @@ public class BookingControllerTest {
     private BookingResponseDTO responseDto;
 
     @BeforeEach
-    void init() {
+    public void init() {
         UserDTO userDto = UserDTO
                 .builder()
                 .id(ID)
@@ -75,8 +75,8 @@ public class BookingControllerTest {
         inputDto = BookingDTO
                 .builder()
                 .id(1L)
-                .start(LocalDateTime.now().plusMinutes(1))
-                .end(LocalDateTime.now().plusDays(10))
+                .start(LocalDateTime.now().plusMinutes(1).withNano(0))
+                .end(LocalDateTime.now().plusDays(10).withNano(0))
                 .bookerId(userDto.getId())
                 .itemId(itemDto.getId())
                 .status(WAITING)

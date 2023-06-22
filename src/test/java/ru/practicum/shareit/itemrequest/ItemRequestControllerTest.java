@@ -42,7 +42,7 @@ class ItemRequestControllerTest {
     private ItemRequestService itemRequestService;
 
     @BeforeEach
-    public void init() throws Exception {
+    public void init() {
 
         item = ItemRequestDTO.builder()
                 .id(1L)
@@ -139,8 +139,10 @@ class ItemRequestControllerTest {
 
     @Test
     void findAllByUserTest() throws Exception {
+
         when(itemRequestService.findAllByUser(anyLong()))
                 .thenReturn(List.of(item));
+
         mvc.perform(get("/requests")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -155,8 +157,10 @@ class ItemRequestControllerTest {
 
     @Test
     void findAllTest() throws Exception {
+
         when(itemRequestService.findAll(anyLong(), anyInt(), anyInt()))
                 .thenReturn(List.of(item));
+
         mvc.perform(get("/requests/all?from=0&size=10")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -171,8 +175,10 @@ class ItemRequestControllerTest {
 
     @Test
     void findByIdTest() throws Exception {
+
         when(itemRequestService.findById(anyLong(), anyLong()))
                 .thenReturn(item);
+
         mvc.perform(get("/requests/1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -181,7 +187,8 @@ class ItemRequestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(item)));
 
-        verify(itemRequestService, times(1)).findById(anyLong(), anyLong());
+        verify(itemRequestService, times(1))
+                .findById(anyLong(), anyLong());
     }
 
 }

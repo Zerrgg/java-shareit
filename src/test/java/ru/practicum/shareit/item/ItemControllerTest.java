@@ -44,7 +44,7 @@ public class ItemControllerTest {
     private CommentDTO commentDTO;
 
     @BeforeEach
-    void init() {
+    public void init() {
         itemDTO = ItemDTO
                 .builder()
                 .id(1L)

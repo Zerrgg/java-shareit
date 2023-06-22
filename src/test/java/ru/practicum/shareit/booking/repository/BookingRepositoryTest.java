@@ -41,7 +41,7 @@ class BookingRepositoryTest {
     private Booking booking;
 
     @BeforeEach
-    public void beforeEach() {
+    public void init() {
         user = User.builder()
                 .name("name")
                 .email("email@email.com")
@@ -63,8 +63,8 @@ class BookingRepositoryTest {
         userRepository.save(user2);
 
         booking = Booking.builder()
-                .start(LocalDateTime.of(2023, 10, 10, 10, 30))
-                .end(LocalDateTime.of(2023, 11, 10, 10, 30))
+                .start(LocalDateTime.now().plusMinutes(1).withNano(0))
+                .end(LocalDateTime.now().plusDays(10).withNano(0))
                 .item(item)
                 .booker(user2)
                 .status(WAITING)
@@ -75,34 +75,45 @@ class BookingRepositoryTest {
     @Test
     void findByItemOwnerTest() {
         bookingRepository.save(booking);
-        assertThat(bookingRepository.findByItemOwner(user, PageRequest.ofSize(10)).size(), equalTo(1));
+
+        assertThat(bookingRepository
+                .findByItemOwner(user, PageRequest.ofSize(10)).size(), equalTo(1));
     }
 
     @Test
     void findAllByBookerTest() {
         bookingRepository.save(booking);
-        assertThat(bookingRepository.findByBooker(user2, PageRequest.ofSize(10)).size(), equalTo(1));
+
+        assertThat(bookingRepository
+                .findByBooker(user2, PageRequest.ofSize(10)).size(), equalTo(1));
     }
 
     @Test
     void findAllByItemAndStatusOrderByStartAscTest() {
         booking.setStatus(APPROVED);
         bookingRepository.save(booking);
-        assertThat(bookingRepository.findAllByItemAndStatusOrderByStartAsc(item, APPROVED).size(), equalTo(1));
+
+        assertThat(bookingRepository
+                .findAllByItemAndStatusOrderByStartAsc(item, APPROVED).size(), equalTo(1));
     }
 
     @Test
     void findAllByItemInAndStatusOrderByStartAscTest() {
         booking.setStatus(APPROVED);
         bookingRepository.save(booking);
+
         List<Item> userItems = itemRepository.findAllByOwnerId(user.getId(), PageRequest.of(0,1));
-        assertThat(bookingRepository.findAllByItemInAndStatusOrderByStartAsc(userItems, APPROVED).size(), equalTo(1));
+
+        assertThat(bookingRepository
+                .findAllByItemInAndStatusOrderByStartAsc(userItems, APPROVED).size(), equalTo(1));
     }
 
     @Test
     void existsBookingByItemAndBookerAndStatusNotAndStartBeforeTest() {
         bookingRepository.save(booking);
-        assertFalse(bookingRepository.existsBookingByItemAndBookerAndStatusNotAndStartBefore(item, user, REJECTED, LocalDateTime.now()));
+
+        assertFalse(bookingRepository
+                .existsBookingByItemAndBookerAndStatusNotAndStartBefore(item, user, REJECTED, LocalDateTime.now()));
     }
 
 }

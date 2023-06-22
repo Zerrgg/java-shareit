@@ -40,7 +40,7 @@ class UserControllerTest {
     private UserDTO userDto;
 
     @BeforeEach
-    void init() {
+    public void init() {
         userDto = UserDTO
                 .builder()
                 .id(ID)
@@ -64,7 +64,8 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(userDto)));
 
-        verify(userService, times(1)).createUser(any(UserDTO.class));
+        verify(userService, times(1))
+                .createUser(any(UserDTO.class));
     }
 
     @Test
@@ -103,11 +104,13 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(userDto)));
 
-        verify(userService, times(1)).findUserById(anyLong());
+        verify(userService, times(1))
+                .findUserById(anyLong());
     }
 
     @Test
     void findAllUsersTest() throws Exception {
+
         when(userService.findAllUsers())
                 .thenReturn(List.of(userDto));
 
@@ -120,7 +123,8 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(List.of(userDto))));
 
-        verify(userService, times(1)).findAllUsers();
+        verify(userService, times(1))
+                .findAllUsers();
     }
 
 
@@ -140,17 +144,17 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(userDto)));
 
-        verify(userService, times(1)).updateUser(anyLong(), any());
+        verify(userService, times(1))
+                .updateUser(anyLong(), any());
     }
 
     @Test
     void updateUserWhenFailEmail() throws Exception {
         userDto = new UserDTO(2L, "user", "");
-        String jsonUser = mapper.writeValueAsString(userDto);
 
         mvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonUser))
+                        .content(mapper.writeValueAsString(userDto)))
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.error", is("Ошибка валидации")));
     }
@@ -167,7 +171,8 @@ class UserControllerTest {
                         .content(jsonUser))
                 .andExpect(status().isOk());
 
-        verify(userService, times(1)).updateUser(anyLong(), any());
+        verify(userService, times(1))
+                .updateUser(anyLong(), any());
     }
 
     @Test
@@ -182,15 +187,18 @@ class UserControllerTest {
                         .content(jsonUser))
                 .andExpect(status().isOk());
 
-        verify(userService, times(1)).updateUser(anyLong(), any());
+        verify(userService, times(1))
+                .updateUser(anyLong(), any());
     }
 
     @Test
     void deleteUserByIdTest() throws Exception {
+
         mvc.perform(delete("/users/1"))
                 .andExpect(status().isOk());
 
-        verify(userService, times(1)).deleteUserById(anyLong());
+        verify(userService, times(1))
+                .deleteUserById(anyLong());
     }
 
 }
