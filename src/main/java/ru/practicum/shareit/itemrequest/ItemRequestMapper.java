@@ -1,15 +1,18 @@
 package ru.practicum.shareit.itemrequest;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.itemrequest.dto.ItemRequestDTO;
 
 import java.util.ArrayList;
 
+@UtilityClass
 public class ItemRequestMapper {
     public static ItemRequest toItemRequest(ItemRequestDTO itemRequestDTO) {
         return ItemRequest.builder()
                 .id(itemRequestDTO.getId())
                 .description(itemRequestDTO.getDescription())
                 .created(itemRequestDTO.getCreated())
+                .requestorId(itemRequestDTO.getRequestorId())
                 .build();
     }
 
@@ -19,6 +22,7 @@ public class ItemRequestMapper {
                 .description(itemRequest.getDescription())
                 .items(new ArrayList<>())
                 .created(itemRequest.getCreated())
+                .requestorId(itemRequest.getRequestorId())
                 .build();
     }
 }

@@ -37,10 +37,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Transactional
     @Override
     public ItemRequestDTO createRequest(Long userId, ItemRequestDTO itemRequestDto) {
-        User user = checkUser(userId);
+        checkUser(userId);
         ItemRequest itemRequest = toItemRequest(itemRequestDto);
         itemRequest.setCreated(LocalDateTime.now());
-        itemRequest.setRequestor(user);
+        itemRequest.setRequestorId(userId);
         itemRequestRepository.save(itemRequest);
 
         return toItemRequestDTO(itemRequest);
@@ -69,9 +69,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Transactional(readOnly = true)
     @Override
     public List<ItemRequestDTO> findAll(Long userId, int from, int size) {
-        User user = checkUser(userId);
+        checkUser(userId);
         PageRequest pageRequest = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "created"));
-        List<ItemRequest> list = itemRequestRepository.findAllByRequestorIsNot(user, pageRequest);
+        List<ItemRequest> list = itemRequestRepository.findAllByRequestorIdIsNot(userId, pageRequest);
         return toDtoList(list);
     }
 

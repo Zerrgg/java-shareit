@@ -10,11 +10,9 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -35,7 +33,7 @@ class ItemRequestRepositoryTest {
 
         itemRequestRepository.save(ItemRequest.builder()
                 .description("description")
-                .requestor(user)
+                .requestorId(user.getId())
                 .created(LocalDateTime.now())
                 .build());
 
@@ -52,12 +50,12 @@ class ItemRequestRepositoryTest {
 
         itemRequestRepository.save(ItemRequest.builder()
                 .description("description")
-                .requestor(user)
+                .requestorId(user.getId())
                 .created(LocalDateTime.now())
                 .build());
 
         assertThat(itemRequestRepository
-                .findAllByRequestorIsNot(user, PageRequest.ofSize(10)).size(), equalTo(0));
+                .findAllByRequestorIdIsNot(user.getId(), PageRequest.ofSize(10)).size(), equalTo(0));
 
         User user2 = userRepository.save(User.builder()
                 .name("name2")
@@ -65,6 +63,6 @@ class ItemRequestRepositoryTest {
                 .build());
 
         assertThat(itemRequestRepository
-                .findAllByRequestorIsNot(user2, PageRequest.ofSize(10)).size(), equalTo(1));
+                .findAllByRequestorIdIsNot(user2.getId(), PageRequest.ofSize(10)).size(), equalTo(1));
     }
 }

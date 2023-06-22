@@ -84,7 +84,7 @@ class ItemRepositoryTest {
 
         ItemRequest itemRequest = itemRequestRepository.save(ItemRequest.builder()
                 .description("item request descr")
-                .requestor(user2)
+                .requestorId(user2.getId())
                 .created(LocalDateTime.now())
                 .build());
 
