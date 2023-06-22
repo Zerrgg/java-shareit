@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.validation.ConstraintViolationException;
+
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler extends ResponseEntityExceptionHandler {
@@ -63,10 +65,17 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler({ValidateCommentException.class})
+    @ExceptionHandler(ValidateCommentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleCommentException(ValidateCommentException e) {
         return new ErrorResponse("Невозможно оставить комментарий 400: ", e.getMessage());
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleConstraintViolationException(final ConstraintViolationException e) {
+        log.debug("Недопустимое значение {}", e.getMessage());
+        return new ErrorResponse("Недопустимое значение {}", e.getMessage());
     }
 
 }

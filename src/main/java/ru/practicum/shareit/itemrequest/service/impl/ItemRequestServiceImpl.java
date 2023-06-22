@@ -54,20 +54,16 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .orElseThrow(() -> new NotFoundException("Невозможно найти запрос - " +
                         "не существует запроса с id " + requestId));
         ItemRequestDTO itemRequestDto = toItemRequestDTO(itemRequest);
-        setItemsToItemRequestDto(itemRequestDto);
 
-        return itemRequestDto;
+        return setItemsToItemRequestDto(itemRequestDto);
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<ItemRequestDTO> findAllByUser(Long userId) {
         checkUser(userId);
-        return itemRequestRepository.findAllByRequestorIdOrderByCreatedAsc(userId)
-                .stream()
-                .map(ItemRequestMapper::toItemRequestDTO)
-                .map(this::setItemsToItemRequestDto)
-                .collect(Collectors.toList());
+        List<ItemRequest> list = itemRequestRepository.findAllByRequestorIdOrderByCreatedAsc(userId);
+        return toDtoList(list);
     }
 
     @Transactional(readOnly = true)
@@ -75,11 +71,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestDTO> findAll(Long userId, int from, int size) {
         User user = checkUser(userId);
         PageRequest pageRequest = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "created"));
-        return itemRequestRepository.findAllByRequestorIsNot(user, pageRequest)
-                .stream()
-                .map(ItemRequestMapper::toItemRequestDTO)
-                .map(this::setItemsToItemRequestDto)
-                .collect(Collectors.toList());
+        List<ItemRequest> list = itemRequestRepository.findAllByRequestorIsNot(user, pageRequest);
+        return toDtoList(list);
     }
 
     private ItemRequestDTO setItemsToItemRequestDto(ItemRequestDTO itemRequestDto) {
@@ -88,6 +81,14 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .map(ItemMapper::toItemShortDTO)
                 .collect(Collectors.toList()));
         return itemRequestDto;
+    }
+
+    private List<ItemRequestDTO> toDtoList(List<ItemRequest> list) {
+        return list
+                .stream()
+                .map(ItemRequestMapper::toItemRequestDTO)
+                .map(this::setItemsToItemRequestDto)
+                .collect(Collectors.toList());
     }
 
     private User checkUser(Long userId) {

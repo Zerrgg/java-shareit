@@ -39,6 +39,7 @@ public class ItemMapperTest {
                 true,
                 null,
                 null,
+                null,
                 null);
 
         user = new User(3L, "name", "user@emali.com");

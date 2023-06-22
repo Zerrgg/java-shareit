@@ -8,7 +8,7 @@ import ru.practicum.shareit.booking.dto.*;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.markers.Create;
 
-import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
@@ -19,7 +19,6 @@ import java.util.List;
 @RequestMapping("/bookings")
 public class BookingController {
 
-    public static final int MIN_VALUE = 0;
     public static final String DEFAULT_FROM_VALUE = "0";
     public static final String DEFAULT_SIZE_VALUE = "20";
     public static final String DEFAULT_STATE_VALUE = "ALL";
@@ -29,8 +28,7 @@ public class BookingController {
 
     @PostMapping
     public BookingResponseDTO createBooking(@RequestBody
-                                            @Validated({Create.class})
-                                            BookingDTO bookingDTO,
+                                            @Validated({Create.class}) BookingDTO bookingDTO,
                                             @RequestHeader(USER_ID_HEADER) Long userId) {
         log.info("POST Запрос на создание бронирования пользователем с id-{}", userId);
         return bookingService.createBooking(bookingDTO, userId);
@@ -55,9 +53,9 @@ public class BookingController {
     public List<BookingResponseDTO> findBookingsByUser(@RequestParam(defaultValue = DEFAULT_STATE_VALUE) String state,
                                                        @RequestHeader(USER_ID_HEADER) Long userId,
                                                        @RequestParam(defaultValue = DEFAULT_FROM_VALUE)
-                                                       @Min(MIN_VALUE) int from,
+                                                       @PositiveOrZero int from,
                                                        @RequestParam(defaultValue = DEFAULT_SIZE_VALUE)
-                                                       @PositiveOrZero int size) {
+                                                       @Positive int size) {
         log.info("GET Запрос на поиск брони пользователя c id-{} по заданному статусу-{}", userId, state);
         return bookingService.findBookingsByUser(state, userId, from, size);
     }
@@ -66,9 +64,9 @@ public class BookingController {
     public List<BookingResponseDTO> findBookingsByItemsOwner(@RequestParam(defaultValue = DEFAULT_STATE_VALUE) String state,
                                                              @RequestHeader(USER_ID_HEADER) Long userId,
                                                              @RequestParam(defaultValue = DEFAULT_FROM_VALUE)
-                                                             @Min(MIN_VALUE) int from,
+                                                             @PositiveOrZero int from,
                                                              @RequestParam(defaultValue = DEFAULT_SIZE_VALUE)
-                                                             @PositiveOrZero int size) {
+                                                             @Positive int size) {
         log.info("GET Запрос на поиск забронированных вещей" +
                 "одного владельца по его Id-{} и заданному статусу-{} бронирования", userId, state);
         return bookingService.findBookingsByItemsOwner(state, userId, from, size);

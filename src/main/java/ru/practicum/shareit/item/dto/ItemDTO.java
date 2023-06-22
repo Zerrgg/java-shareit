@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingDTO;
 import ru.practicum.shareit.comment.dto.CommentDTO;
 import ru.practicum.shareit.exception.markers.Create;
-import ru.practicum.shareit.exception.markers.Update;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

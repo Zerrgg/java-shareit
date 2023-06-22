@@ -31,6 +31,8 @@ import java.util.*;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static ru.practicum.shareit.comment.CommentMapper.*;
+import static ru.practicum.shareit.item.ItemMapper.*;
 
 @Slf4j
 @Service
@@ -46,9 +48,9 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public ItemDTO createItem(ItemDTO itemDTO, Long userId) {
         User owner = checkUser(userId);
-        Item item = ItemMapper.toItem(itemDTO, owner);
+        Item item = toItem(itemDTO, owner);
         item = itemRepository.save(item);
-        return ItemMapper.toItemDTO(item);
+        return toItemDTO(item);
     }
 
     @Override
@@ -65,11 +67,11 @@ public class ItemServiceImpl implements ItemService {
                             userId, item.getId()));
         }
 
-        Item updatedItem = ItemMapper.toItem(itemDTO, owner);
+        Item updatedItem = toItem(itemDTO, owner);
         updatedItem.setId(itemId);
-        List<CommentDTO> comments = CommentMapper.toDTOList(commentRepository.findAllByItemOrderByIdAsc(item));
+        List<CommentDTO> comments = toDTOList(commentRepository.findAllByItemOrderByIdAsc(item));
         updatedItem = itemRepository.save(refreshItem(updatedItem));
-        return ItemMapper.toItemWithCommentsDTO(updatedItem, comments);
+        return toItemWithCommentsDTO(updatedItem, comments);
     }
 
     @Override
@@ -78,7 +80,7 @@ public class ItemServiceImpl implements ItemService {
         checkUser(userId);
         Item item = checkItem(itemId);
 
-        List<CommentDTO> comments = CommentMapper.toDTOList(commentRepository.findAllByItemOrderByIdAsc(item));
+        List<CommentDTO> comments = toDTOList(commentRepository.findAllByItemOrderByIdAsc(item));
 
         List<Booking> bookings = bookingRepository.findAllByItemAndStatusOrderByStartAsc(item, BookingStatus.APPROVED);
         List<BookingDTO> bookingDTOList = bookings
@@ -89,14 +91,14 @@ public class ItemServiceImpl implements ItemService {
         boolean trueOwner = item.getOwner().getId().equals(userId);
 
         if (trueOwner) {
-            return ItemMapper.toItemWithBookingDTO(
+            return toItemWithBookingDTO(
                     item,
                     getLastBooking(bookingDTOList),
                     getNextBooking(bookingDTOList),
                     comments);
         }
 
-        return ItemMapper.toItemWithCommentsDTO(item, comments);
+        return toItemWithCommentsDTO(item, comments);
     }
 
     @Override
@@ -117,7 +119,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(groupingBy(BookingDTO::getItemId, toList()));
         return userItems
                 .stream()
-                .map(item -> ItemMapper.toItemWithBookingDTO(
+                .map(item -> toItemWithBookingDTO(
                         item,
                         getLastBooking(bookings.get(item.getId())),
                         getNextBooking(bookings.get(item.getId())),
@@ -174,10 +176,10 @@ public class ItemServiceImpl implements ItemService {
             log.warn("Нельзя оставить комментарий на предмет с Id: {}", itemId);
             throw new ValidateCommentException(String.format("Нельзя оставить комментарий на предмет с Id: %d", itemId));
         }
-        Comment comment = CommentMapper.toComment(commentDTO, item, author);
+        Comment comment = toComment(commentDTO, item, author);
         comment.setCreated(LocalDateTime.now());
         comment = commentRepository.save(comment);
-        return CommentMapper.toCommentDTO(comment);
+        return toCommentDTO(comment);
     }
 
     private Item checkItem(Long itemId) {

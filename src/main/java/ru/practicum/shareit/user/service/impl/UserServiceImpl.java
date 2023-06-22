@@ -15,6 +15,9 @@ import ru.practicum.shareit.user.service.UserService;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.user.UserMapper.toUser;
+import static ru.practicum.shareit.user.UserMapper.toUserDTO;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -24,9 +27,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO createUser(UserDTO userDTO) {
-        User user = UserMapper.toUser(userDTO);
+        User user = toUser(userDTO);
         user = userRepository.save(user);
-        return UserMapper.toUserDTO(user);
+        return toUserDTO(user);
     }
 
     @Override
@@ -35,7 +38,7 @@ public class UserServiceImpl implements UserService {
         User user = patchUser(userDTO, userId);
         user.setId(userId);
         user = userRepository.save(user);
-        return UserMapper.toUserDTO(user);
+        return toUserDTO(user);
     }
 
     @Override
@@ -46,7 +49,7 @@ public class UserServiceImpl implements UserService {
                             return new NotFoundException(String.format("не найден пользователь с id: %d", id));
                         }
                 );
-        return UserMapper.toUserDTO(user);
+        return toUserDTO(user);
     }
 
     @Override
@@ -74,7 +77,7 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.hasText(newEmail) && !oldEmail.equals(newEmail)) {
             entry.setEmail(newEmail);
         }
-        return UserMapper.toUser(entry);
+        return toUser(entry);
     }
 
 }

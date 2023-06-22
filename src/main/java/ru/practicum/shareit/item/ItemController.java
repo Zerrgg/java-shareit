@@ -10,7 +10,6 @@ import ru.practicum.shareit.exception.markers.Update;
 import ru.practicum.shareit.item.dto.ItemDTO;
 import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
@@ -55,11 +54,9 @@ public class ItemController {
     @GetMapping
     public List<ItemDTO> findAllItemByUserId(@RequestHeader(USER_ID_HEADER) Long userId,
                                              @RequestParam(defaultValue = DEFAULT_FROM_VALUE)
-                                             @PositiveOrZero
-                                             int from,
+                                             @PositiveOrZero int from,
                                              @RequestParam(defaultValue = DEFAULT_SIZE_VALUE)
-                                             @Positive
-                                             int size) {
+                                             @Positive int size) {
         log.info("GET Запрос на поиск предметов пользователя c id-{}", userId);
         return itemService.findAllItemsByUserId(userId, from, size);
     }
@@ -67,11 +64,9 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemDTO> findItemsByRequest(@RequestParam String text,
                                             @RequestParam(defaultValue = DEFAULT_FROM_VALUE)
-                                            @PositiveOrZero
-                                            int from,
+                                            @PositiveOrZero int from,
                                             @RequestParam(defaultValue = DEFAULT_SIZE_VALUE)
-                                            @Positive
-                                            int size) {
+                                            @Positive int size) {
         log.info("GET Запрос на поиск предметов по запросу-{} от пользователя", text);
         return itemService.findItemsByRequest(text, from, size);
     }

@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,26 +14,28 @@ import ru.practicum.shareit.user.dto.UserDTO;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.is;
 
 @WebMvcTest(UserController.class)
 @AutoConfigureMockMvc
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserControllerTest {
 
-    @Autowired
-    private ObjectMapper mapper;
+    public static final Long ID = 1L;
+    public static final String USER_ID_HEADER = "X-Sharer-User-Id";
+
+
+    private final ObjectMapper mapper;
 
     @MockBean
     private UserService userService;
 
-    @Autowired
-    private MockMvc mvc;
+    private final MockMvc mvc;
 
     private UserDTO userDto;
 
@@ -40,7 +43,7 @@ class UserControllerTest {
     void init() {
         userDto = UserDTO
                 .builder()
-                .id(1L)
+                .id(ID)
                 .name("user name")
                 .email("user@email.com")
                 .build();
@@ -56,12 +59,33 @@ class UserControllerTest {
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(USER_ID_HEADER, ID)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(userDto)));
 
         verify(userService, times(1)).createUser(any(UserDTO.class));
+    }
+
+    @Test
+    void createUserWhenFailName() throws Exception {
+        userDto = new UserDTO(2L, "", "user@user.com");
+
+        mvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(userDto)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void createUserWhenFailEmail() throws Exception {
+        userDto = new UserDTO(2L, "user", "");
+
+        mvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(userDto)))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.error", is("Ошибка валидации")));
     }
 
     @Test
@@ -74,7 +98,7 @@ class UserControllerTest {
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(USER_ID_HEADER, ID)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(userDto)));
@@ -88,11 +112,11 @@ class UserControllerTest {
                 .thenReturn(List.of(userDto));
 
         mvc.perform(get("/users")
-                .content(mapper.writeValueAsString(userDto))
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("X-Sharer-User-Id", 1L)
-                .accept(MediaType.APPLICATION_JSON))
+                        .content(mapper.writeValueAsString(userDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(USER_ID_HEADER, ID)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(List.of(userDto))));
 
@@ -104,19 +128,61 @@ class UserControllerTest {
     void updateUserTest() throws Exception {
         userDto.setName("updatedName");
 
-        when(userService.updateUser(any(Long.class), any(UserDTO.class)))
+        when(userService.updateUser(anyLong(), any()))
                 .thenReturn(userDto);
 
         mvc.perform(patch("/users/1")
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(USER_ID_HEADER, ID)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(userDto)));
 
-        verify(userService, times(1)).updateUser(any(Long.class), any(UserDTO.class));
+        verify(userService, times(1)).updateUser(anyLong(), any());
+    }
+
+    @Test
+    void updateUserWhenFailEmail() throws Exception {
+        userDto = new UserDTO(2L, "user", "");
+        String jsonUser = mapper.writeValueAsString(userDto);
+
+        mvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonUser))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.error", is("Ошибка валидации")));
+    }
+
+    @Test
+    void updateUserPatchUserName() throws Exception {
+        String jsonUser = "{\"name\":\"updateName\"}";
+
+        when(userService.updateUser(anyLong(), any()))
+                .thenReturn(userDto);
+
+        mvc.perform(patch("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonUser))
+                .andExpect(status().isOk());
+
+        verify(userService, times(1)).updateUser(anyLong(), any());
+    }
+
+    @Test
+    void updateUserPatchUserEmail() throws Exception {
+        String jsonUser = "{\"email\":\"updateName@user.com\"}";
+
+        when(userService.updateUser(anyLong(), any()))
+                .thenReturn(userDto);
+
+        mvc.perform(patch("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonUser))
+                .andExpect(status().isOk());
+
+        verify(userService, times(1)).updateUser(anyLong(), any());
     }
 
     @Test
@@ -124,7 +190,7 @@ class UserControllerTest {
         mvc.perform(delete("/users/1"))
                 .andExpect(status().isOk());
 
-        verify(userService, times(1)).deleteUserById(any(Long.class));
+        verify(userService, times(1)).deleteUserById(anyLong());
     }
 
 }

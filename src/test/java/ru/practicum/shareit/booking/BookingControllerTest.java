@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDTO;
 import ru.practicum.shareit.booking.dto.BookingResponseDTO;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidateBookingException;
 import ru.practicum.shareit.item.dto.ItemDTO;
 import ru.practicum.shareit.user.dto.UserDTO;
@@ -22,11 +24,14 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.practicum.shareit.booking.BookingStatus.WAITING;
+import static org.hamcrest.Matchers.is;
 
 @WebMvcTest(BookingController.class)
 @AutoConfigureMockMvc
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class BookingControllerTest {
 
     public static final Long ID = 2L;
@@ -34,14 +39,17 @@ public class BookingControllerTest {
     public static final String APPROVED_PARAM = "approved";
     public static final String USER_ID_HEADER = "X-Sharer-User-Id";
 
+    public static final String FROM_VALUE = "0";
+    public static final String SIZE_VALUE = "10";
+    public static final String FROM_PARAM = "from";
+    public static final String SIZE_PARAM = "size";
+
     @MockBean
-    BookingService bookingService;
+    private BookingService bookingService;
 
-    @Autowired
-    ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
-    @Autowired
-    MockMvc mvc;
+    private final MockMvc mvc;
 
     private BookingDTO inputDto;
 
@@ -59,16 +67,16 @@ public class BookingControllerTest {
         ItemDTO itemDto = ItemDTO
                 .builder()
                 .id(1L)
-                .name("itemname")
-                .description("descriptionitem")
+                .name("itemName")
+                .description("descriptionItem")
                 .available(true)
                 .build();
 
         inputDto = BookingDTO
                 .builder()
                 .id(1L)
-                .start(LocalDateTime.of(2023, 10, 10, 10, 0))
-                .end(LocalDateTime.of(2023, 10, 20, 10, 0))
+                .start(LocalDateTime.now().plusMinutes(1))
+                .end(LocalDateTime.now().plusDays(10))
                 .bookerId(userDto.getId())
                 .itemId(itemDto.getId())
                 .status(WAITING)
@@ -77,8 +85,8 @@ public class BookingControllerTest {
         responseDto = BookingResponseDTO
                 .builder()
                 .id(1L)
-                .start(LocalDateTime.of(2023, 10, 10, 10, 0))
-                .end(LocalDateTime.of(2023, 10, 20, 10, 0))
+                .start(LocalDateTime.now().plusMinutes(1).withNano(0))
+                .end(LocalDateTime.now().plusDays(10).withNano(0))
                 .status(WAITING)
                 .item(itemDto)
                 .booker(userDto)
@@ -122,6 +130,80 @@ public class BookingControllerTest {
     }
 
     @Test
+    void updateBookingWithoutBookingTest() throws Exception {
+        when(bookingService.updateBooking(anyLong(), anyBoolean(), anyLong()))
+                .thenThrow(new NotFoundException("Бронь не найдена"));
+
+        mvc.perform(patch("/bookings/11")
+                        .param(APPROVED_PARAM, APPROVED_VALUE)
+                        .header(USER_ID_HEADER, ID)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.error", is("Недопустимое значение {}")));
+
+        verify(bookingService, times(1))
+                .updateBooking(anyLong(), anyBoolean(), anyLong());
+    }
+
+    @Test
+    void updateBookingWithUnknownUserTest() throws Exception {
+        when(bookingService.updateBooking(anyLong(), anyBoolean(), anyLong()))
+                .thenThrow(new NotFoundException("Бронь не найдена"));
+
+        mvc.perform(patch("/bookings/1")
+                        .param(APPROVED_PARAM, APPROVED_VALUE)
+                        .header(USER_ID_HEADER, 11)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.error", is("Недопустимое значение {}")));
+
+        verify(bookingService, times(1))
+                .updateBooking(anyLong(), anyBoolean(), anyLong());
+    }
+
+    @Test
+    void updateBookingWithApproved() throws Exception {
+        when(bookingService.updateBooking(anyLong(), anyBoolean(), anyLong()))
+                .thenThrow(new ValidateBookingException("Статус APPROVED уже установлен"));
+
+        mvc.perform(patch("/bookings/1")
+                        .param(APPROVED_PARAM, APPROVED_VALUE)
+                        .header(USER_ID_HEADER, ID)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.error", is("Ошибка бронирования 400: ")));
+
+        verify(bookingService, times(1))
+                .updateBooking(anyLong(), anyBoolean(), anyLong());
+    }
+
+    @Test
+    void updateBookingWithApprovedFalse() throws Exception {
+        responseDto.setStatus(BookingStatus.REJECTED);
+
+        when(bookingService.updateBooking(anyLong(), anyBoolean(), anyLong()))
+                .thenReturn(responseDto);
+
+        mvc.perform(patch("/bookings/1")
+                        .param(APPROVED_PARAM, "false")
+                        .header(USER_ID_HEADER, ID)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("REJECTED"));
+
+        verify(bookingService, times(1))
+                .updateBooking(anyLong(), anyBoolean(), anyLong());
+    }
+
+    @Test
     void findBookingByIdTest() throws Exception {
         when(bookingService.findBookingById(anyLong(), anyLong()))
                 .thenReturn(responseDto);
@@ -145,6 +227,8 @@ public class BookingControllerTest {
 
         mvc.perform(get("/bookings")
                         .header(USER_ID_HEADER, ID)
+                        .param(FROM_PARAM, FROM_VALUE)
+                        .param(SIZE_PARAM, SIZE_VALUE)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -157,12 +241,13 @@ public class BookingControllerTest {
 
     @Test
     void findBookingsByItemsOwnerTest() throws Exception {
-        when(bookingService
-                .findBookingsByItemsOwner(anyString(), anyLong(), anyInt(), anyInt()))
+        when(bookingService.findBookingsByItemsOwner(anyString(), anyLong(), anyInt(), anyInt()))
                 .thenReturn(List.of(responseDto));
 
         mvc.perform(get("/bookings/owner")
                         .header(USER_ID_HEADER, ID)
+                        .param(FROM_PARAM, FROM_VALUE)
+                        .param(SIZE_PARAM, SIZE_VALUE)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -174,10 +259,39 @@ public class BookingControllerTest {
     }
 
     @Test
+    void findBookingsWithSizeMinus() throws Exception {
+        when(bookingService.findBookingsByItemsOwner(anyString(), anyLong(), anyInt(), anyInt()))
+                .thenReturn(List.of(responseDto));
+
+        mvc.perform(get("/bookings/owner")
+                .header(USER_ID_HEADER, ID)
+                .param(FROM_PARAM, FROM_VALUE)
+                .param(SIZE_PARAM, "-1"))
+                .andDo(print())
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void findBookingsWithFromMinus() throws Exception {
+        when(bookingService.findBookingsByItemsOwner(anyString(), anyLong(), anyInt(), anyInt()))
+                .thenReturn(List.of(responseDto));
+
+        mvc.perform(get("/bookings/owner")
+                        .header(USER_ID_HEADER, ID)
+                        .param(FROM_PARAM, "-1")
+                        .param(SIZE_PARAM, SIZE_VALUE))
+                .andDo(print())
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
     void findBookingsByUserWrongStateTest() throws Exception {
         when(bookingService.findBookingsByUser(anyString(), anyLong(), anyInt(), anyInt()))
                 .thenThrow(ValidateBookingException.class);
+
         mvc.perform(get("/bookings?state=text")
+                        .param(FROM_PARAM, FROM_VALUE)
+                        .param(SIZE_PARAM, SIZE_VALUE)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(USER_ID_HEADER, ID)
