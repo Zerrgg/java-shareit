@@ -2,13 +2,15 @@ package ru.practicum.shareit.booking;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.practicum.shareit.booking.dto.*;
+import ru.practicum.shareit.booking.dto.BookingDTO;
+import ru.practicum.shareit.booking.dto.BookingResponseDTO;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class BookingMapperTest {
 
@@ -20,13 +22,10 @@ public class BookingMapperTest {
     private BookingDTO bookingDto;
 
     @BeforeEach
-    public void beforeEach() {
+    public void inith() {
         bookingDto = new BookingDTO(1L, 3L, DATE, DATE.plusDays(7), 5L, BookingStatus.WAITING);
-
         user = new User(5L, "name", "user@emali.com");
-
         item = new Item(3L, "name", "description", true, user, null);
-
         booking = new Booking(2L, DATE, DATE.plusDays(7), item, user, BookingStatus.APPROVED);
     }
 

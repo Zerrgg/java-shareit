@@ -23,7 +23,7 @@ public class CommentMapperTest {
     private CommentDTO commentDTO;
 
     @BeforeEach
-    public void beforeEach() {
+    public void init() {
         user = new User(5L, "name", "user@emali.com");
         item = new Item(3L, "name", "description", true, user, null);
         comment = new Comment(1L, "comment", item, user, CREATED_DATE);

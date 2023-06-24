@@ -2,19 +2,18 @@ package ru.practicum.shareit.itemrequest.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.itemrequest.ItemRequest;
 import ru.practicum.shareit.itemrequest.ItemRequestMapper;
 import ru.practicum.shareit.itemrequest.dto.ItemRequestDTO;
 import ru.practicum.shareit.itemrequest.repository.ItemRequestRepository;
 import ru.practicum.shareit.itemrequest.service.ItemRequestService;
-
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.ItemMapper;
-import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -41,9 +40,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         ItemRequest itemRequest = toItemRequest(itemRequestDto);
         itemRequest.setCreated(LocalDateTime.now());
         itemRequest.setRequestorId(userId);
-        itemRequestRepository.save(itemRequest);
+        ItemRequest request = itemRequestRepository.save(itemRequest);
 
-        return toItemRequestDTO(itemRequest);
+        return toItemRequestDTO(request);
     }
 
     @Transactional(readOnly = true)

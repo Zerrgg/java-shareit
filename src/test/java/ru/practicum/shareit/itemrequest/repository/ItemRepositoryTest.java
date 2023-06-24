@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.repository;
+package ru.practicum.shareit.itemrequest.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -7,8 +7,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.itemrequest.ItemRequest;
-import ru.practicum.shareit.itemrequest.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -36,7 +36,7 @@ class ItemRepositoryTest {
     private Item item;
 
     @BeforeEach
-    public void beforeEach() {
+    public void init() {
         itemOwner = User.builder()
                 .name("owner")
                 .email("owner@email.com")

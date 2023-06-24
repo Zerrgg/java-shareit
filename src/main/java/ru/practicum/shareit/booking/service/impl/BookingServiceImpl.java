@@ -10,8 +10,8 @@ import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.State;
-import ru.practicum.shareit.booking.dto.BookingResponseDTO;
 import ru.practicum.shareit.booking.dto.BookingDTO;
+import ru.practicum.shareit.booking.dto.BookingResponseDTO;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -128,6 +128,9 @@ public class BookingServiceImpl implements BookingService {
         User owner = checkUser(userId);
         PageRequest pageRequest = PageRequest.of(from / size, size, Sort.by("start").descending());
         List<Booking> ownerBookings = bookingRepository.findByBooker(owner, pageRequest);
+        if (ownerBookings.isEmpty()) {
+            throw new NotFoundException("Бронирование не найдено");
+        }
         State bookings = parseState(stateValue);
         return getBookingByState(ownerBookings, bookings);
     }
@@ -138,6 +141,9 @@ public class BookingServiceImpl implements BookingService {
         User owner = checkUser(userId);
         PageRequest pageRequest = PageRequest.of(from / size, size, Sort.by("start").descending());
         List<Booking> ownerBookings = bookingRepository.findByItemOwner(owner, pageRequest);
+        if (ownerBookings.isEmpty()) {
+            throw new NotFoundException("Бронирование не найдено");
+        }
         State bookings = parseState(stateValue);
         return getBookingByState(ownerBookings, bookings);
     }

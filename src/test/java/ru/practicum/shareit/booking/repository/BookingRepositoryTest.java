@@ -1,12 +1,10 @@
 package ru.practicum.shareit.booking.repository;
 
-import org.h2.mvstore.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.item.Item;
@@ -102,7 +100,7 @@ class BookingRepositoryTest {
         booking.setStatus(APPROVED);
         bookingRepository.save(booking);
 
-        List<Item> userItems = itemRepository.findAllByOwnerId(user.getId(), PageRequest.of(0,1));
+        List<Item> userItems = itemRepository.findAllByOwnerId(user.getId(), PageRequest.of(0, 1));
 
         assertThat(bookingRepository
                 .findAllByItemInAndStatusOrderByStartAsc(userItems, APPROVED).size(), equalTo(1));

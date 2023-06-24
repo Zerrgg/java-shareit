@@ -6,8 +6,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exception.markers.Create;
 import ru.practicum.shareit.exception.markers.Update;
-import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.dto.UserDTO;
+import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.constraints.Positive;
 import java.util.List;

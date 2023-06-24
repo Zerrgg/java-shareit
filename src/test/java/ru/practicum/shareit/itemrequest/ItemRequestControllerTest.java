@@ -53,7 +53,7 @@ class ItemRequestControllerTest {
     }
 
     @Test
-    void createRequestWithoutUser() throws Exception {
+    void createRequestWithoutUserTest() throws Exception {
 
         mvc.perform(post("/requests")
                         .header(USER_ID_HEADER, -10L)
@@ -63,7 +63,7 @@ class ItemRequestControllerTest {
     }
 
     @Test
-    void createRequestWithEmptyDescription() throws Exception {
+    void createRequestWithEmptyDescriptionTest() throws Exception {
         item.setDescription(null);
 
         mvc.perform(post("/requests")
@@ -75,7 +75,7 @@ class ItemRequestControllerTest {
 
 
     @Test
-    void findAllByUserWithoutUser() throws Exception {
+    void findAllByUserWithoutUserTest() throws Exception {
 
         mvc.perform(get("/requests"))
                 .andExpect(status().is4xxClientError());
@@ -83,7 +83,7 @@ class ItemRequestControllerTest {
 
 
     @Test
-    void findAllByUserWithoutRequest() throws Exception {
+    void findAllByUserWithoutRequestTest() throws Exception {
 
         when(itemRequestService.findAllByUser(anyLong()))
                 .thenReturn(Collections.emptyList());
@@ -95,7 +95,7 @@ class ItemRequestControllerTest {
     }
 
     @Test
-    void findAllWithFrom0Size0() throws Exception {
+    void findAllWithFrom0Size0Test() throws Exception {
 
         mvc.perform(get("/requests/all?from=0&size=0")
                         .header(USER_ID_HEADER, ID))
@@ -103,7 +103,7 @@ class ItemRequestControllerTest {
     }
 
     @Test
-    void findAllWithFromMin() throws Exception {
+    void findAllWithFromMinTest() throws Exception {
 
         mvc.perform(get("/requests/all?from=-1&size=20")
                         .header(USER_ID_HEADER, ID))
@@ -111,7 +111,7 @@ class ItemRequestControllerTest {
     }
 
     @Test
-    void findAllWithSizeMin() throws Exception {
+    void findAllWithSizeMinTest() throws Exception {
 
         mvc.perform(get("/requests/all?from=0&size=-1")
                         .header(USER_ID_HEADER, ID))

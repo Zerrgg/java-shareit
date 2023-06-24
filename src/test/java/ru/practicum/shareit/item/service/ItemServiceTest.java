@@ -2,10 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.comment.Comment;
 import ru.practicum.shareit.comment.CommentMapper;
@@ -28,10 +25,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static ru.practicum.shareit.booking.BookingStatus.WAITING;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ItemServiceTest {
@@ -49,11 +45,10 @@ public class ItemServiceTest {
     private User user;
     private ItemDTO itemDTO;
     private Comment comment;
-    private Booking booking;
     private CommentDTO commentDTO;
 
     @BeforeEach
-    public void beforeEach() {
+    public void init() {
         itemRepository = mock(ItemRepository.class);
         userRepository = mock(UserRepository.class);
         bookingRepository = mock(BookingRepository.class);
@@ -78,6 +73,7 @@ public class ItemServiceTest {
                 .description("description")
                 .available(true)
                 .owner(owner)
+                .requestId(user.getId())
                 .build();
 
         comment = Comment.builder()
@@ -96,6 +92,7 @@ public class ItemServiceTest {
                 .lastBooking(null)
                 .nextBooking(null)
                 .comments(null)
+                .requestId(item.getRequestId())
                 .build();
 
         comment = Comment.builder()
@@ -107,25 +104,18 @@ public class ItemServiceTest {
 
         commentDTO = CommentMapper.toCommentDTO(comment);
 
-        booking = Booking.builder()
-                .start(DATE)
-                .end(DATE.plusDays(10))
-                .item(item)
-                .booker(user)
-                .status(WAITING)
-                .build();
-
     }
 
     @Test
     void createItemTest() {
-        when(userRepository.findById(any(Long.class)))
+
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(owner));
 
         when(userRepository.findAll())
                 .thenReturn(Collections.singletonList(user));
 
-        when(itemRepository.save(any(Item.class)))
+        when(itemRepository.save(any()))
                 .thenReturn(item);
 
         ItemDTO result = itemService.createItem(itemDTO, 3L);
@@ -134,6 +124,7 @@ public class ItemServiceTest {
         assertEquals(itemDTO.getName(), result.getName());
         assertEquals(itemDTO.getDescription(), result.getDescription());
         assertEquals(itemDTO.getAvailable(), result.getAvailable());
+        assertEquals(itemDTO.getRequestId(), result.getRequestId());
     }
 
     @Test
@@ -150,17 +141,17 @@ public class ItemServiceTest {
 
     @Test
     void addCommentTest() {
-        when(itemRepository.findById(any(Long.class)))
+        when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
         when(bookingRepository
-                .existsBookingByItemAndBookerAndStatusNotAndStartBefore(any(Item.class), any(User.class), any(BookingStatus.class), any(LocalDateTime.class)))
+                .existsBookingByItemAndBookerAndStatusNotAndStartBefore(any(), any(), any(), any()))
                 .thenReturn(true);
 
-        when(commentRepository.save(any(Comment.class)))
+        when(commentRepository.save(any()))
                 .thenReturn(comment);
 
         CommentDTO result = itemService.addComment(commentDTO, 5L, 2L);
@@ -173,17 +164,17 @@ public class ItemServiceTest {
     @Test
     void addCommentExceptionTest() {
 
-        when(itemRepository.findById(any(Long.class)))
+        when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(commentRepository.save(any(Comment.class)))
+        when(commentRepository.save(any()))
                 .thenReturn(comment);
 
         when(bookingRepository
-                .existsBookingByItemAndBookerAndStatusNotAndStartBefore(any(Item.class), any(User.class), any(BookingStatus.class), any(LocalDateTime.class)))
+                .existsBookingByItemAndBookerAndStatusNotAndStartBefore(any(), any(), any(), any()))
                 .thenReturn(false);
 
         Exception e = assertThrows(ValidateCommentException.class,
@@ -199,16 +190,16 @@ public class ItemServiceTest {
         itemDTO.setName("updatedName");
         item.setName("updatedName");
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(owner));
 
-        when(commentRepository.findAllByItemOrderByIdAsc(any(Item.class)))
+        when(commentRepository.findAllByItemOrderByIdAsc(any()))
                 .thenReturn(new ArrayList<>());
 
-        when(itemRepository.save(any(Item.class)))
+        when(itemRepository.save(any()))
                 .thenReturn(item);
 
-        when(itemRepository.findById(any(Long.class)))
+        when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
 
         ItemDTO result = itemService.updateItem(itemDTO, item.getId(), owner.getId());
@@ -222,13 +213,13 @@ public class ItemServiceTest {
     void updateItemDeniedAccessExceptionTest() {
         item.setOwner(owner);
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(commentRepository.findAllByItemOrderByIdAsc(any(Item.class)))
+        when(commentRepository.findAllByItemOrderByIdAsc(any()))
                 .thenReturn(new ArrayList<>());
 
-        when(itemRepository.findById(any(Long.class)))
+        when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
 
         Exception e = assertThrows(DeniedAccessException.class,
@@ -242,13 +233,13 @@ public class ItemServiceTest {
     @Test
     void findItemByIdTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(owner));
 
-        when(itemRepository.findById(any(Long.class)))
+        when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
 
-        when(commentRepository.findAllByItemOrderByIdAsc(any(Item.class)))
+        when(commentRepository.findAllByItemOrderByIdAsc(any()))
                 .thenReturn(new ArrayList<>());
 
         ItemDTO result = itemService.findItemById(5L, 3L);
@@ -260,7 +251,8 @@ public class ItemServiceTest {
 
     @Test
     void findAllItemsByUserIdTest() {
-        when(userRepository.findById(any(Long.class)))
+
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(owner));
 
         when(itemRepository.findAll())
@@ -274,10 +266,10 @@ public class ItemServiceTest {
     @Test
     void findItemsByRequestTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(itemRepository.search(any(String.class), any(PageRequest.class)))
+        when(itemRepository.search(anyString(), any()))
                 .thenReturn(new ArrayList<>());
 
         List<ItemDTO> result = itemService.findItemsByRequest("request", 0, 10);

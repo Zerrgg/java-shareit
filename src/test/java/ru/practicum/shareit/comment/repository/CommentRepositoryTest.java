@@ -1,7 +1,5 @@
 package ru.practicum.shareit.comment.repository;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +14,8 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -36,7 +36,7 @@ class CommentRepositoryTest {
     private Comment comment;
 
     @BeforeEach
-    public void beforeEach() {
+    public void init() {
 
         itemOwner = User.builder()
                 .name("name")

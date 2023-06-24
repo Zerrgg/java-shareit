@@ -3,7 +3,6 @@ package ru.practicum.shareit.itemrequest.repository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.practicum.shareit.itemrequest.ItemRequest;
-import ru.practicum.shareit.user.User;
 
 import java.util.List;
 

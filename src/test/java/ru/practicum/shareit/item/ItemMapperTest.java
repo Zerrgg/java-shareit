@@ -1,8 +1,5 @@
 package ru.practicum.shareit.item;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.booking.Booking;
@@ -17,6 +14,8 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class ItemMapperTest {
 
     public static final long ID = 1L;
@@ -29,19 +28,9 @@ public class ItemMapperTest {
     private Booking booking;
 
     @BeforeEach
-    public void beforeEach() {
+    public void init() {
         item = new Item(1L, "name", "description", true, user, null);
-
-        itemDto = new ItemDTO(
-                1L,
-                "name",
-                "description",
-                true,
-                null,
-                null,
-                null,
-                null);
-
+        itemDto = new ItemDTO(1L, "name", "description", true, null, null, null, null);
         user = new User(3L, "name", "user@emali.com");
         comment = new Comment(5L, "comment", item, user, CREATED_DATE);
 

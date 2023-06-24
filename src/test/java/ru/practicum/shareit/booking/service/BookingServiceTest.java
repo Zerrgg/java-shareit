@@ -2,9 +2,6 @@ package ru.practicum.shareit.booking.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
@@ -27,6 +24,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -47,7 +45,7 @@ class BookingServiceTest {
     private BookingDTO inputDto;
 
     @BeforeEach
-    public void beforeEach() {
+    public void init() {
         userRepository = mock(UserRepository.class);
         itemRepository = mock(ItemRepository.class);
         bookingRepository = mock(BookingRepository.class);
@@ -95,13 +93,13 @@ class BookingServiceTest {
     @Test
     void createBookingTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(itemRepository.findById(any(Long.class)))
+        when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
 
-        when(bookingRepository.save(any(Booking.class)))
+        when(bookingRepository.save(any()))
                 .thenReturn(booking);
 
         BookingResponseDTO result = bookingService.createBooking(inputDto, 2L);
@@ -116,10 +114,10 @@ class BookingServiceTest {
     void createBookingWithValidateExceptionTest() {
         item.setAvailable(false);
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(itemRepository.findById(any(Long.class)))
+        when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
 
         Exception e = assertThrows(ValidateBookingException.class,
@@ -133,10 +131,10 @@ class BookingServiceTest {
     void createBookingWithNotFoundExceptionTest() {
         item.setOwner(user);
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(itemRepository.findById(any(Long.class)))
+        when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
 
         Exception e = assertThrows(NotFoundException.class,
@@ -150,13 +148,13 @@ class BookingServiceTest {
     void updateBookingTest() {
         booking.setStatus(BookingStatus.WAITING);
 
-        when(bookingRepository.findById(any(Long.class)))
+        when(bookingRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booking));
 
-        when(itemRepository.findById(any(Long.class)))
+        when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
 
-        when(bookingRepository.save(any(Booking.class)))
+        when(bookingRepository.save(any()))
                 .thenReturn(booking);
 
         BookingResponseDTO result = bookingService.updateBooking(1l, true, 3L);
@@ -171,7 +169,7 @@ class BookingServiceTest {
         booking.setStatus(BookingStatus.WAITING);
         item.setOwner(user);
 
-        when(itemRepository.findById(any(Long.class)))
+        when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
 
         Exception e = assertThrows(NotFoundException.class,
@@ -185,13 +183,13 @@ class BookingServiceTest {
     void updateBookingWithValidateExceptionTest() {
         booking.setStatus(BookingStatus.WAITING);
 
-        when(bookingRepository.findById(any(Long.class)))
+        when(bookingRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booking));
 
-        when(itemRepository.findById(any(Long.class)))
+        when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
 
-        when(bookingRepository.save(any(Booking.class)))
+        when(bookingRepository.save(any()))
                 .thenReturn(booking);
 
         booking.setStatus(BookingStatus.APPROVED);
@@ -207,10 +205,10 @@ class BookingServiceTest {
     void findBookingByIdTest() {
         item.setOwner(owner);
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(bookingRepository.findById(any(Long.class)))
+        when(bookingRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booking));
 
         BookingResponseDTO result = bookingService.findBookingById(1L, 2L);
@@ -223,10 +221,10 @@ class BookingServiceTest {
     void findBookingByIdWithNotFoundExceptionTest() {
         user.setId(11L);
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(bookingRepository.findById(any(Long.class)))
+        when(bookingRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booking));
 
         Exception e = assertThrows(NotFoundException.class,
@@ -239,75 +237,76 @@ class BookingServiceTest {
     @Test
     void findBookingsByUserStateRejectedTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-
-        List<BookingResponseDTO> result = bookingService
-                .findBookingsByUser("rejected", 2L, 0,10);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        Exception e = assertThrows(NotFoundException.class,
+                () -> {
+                    List<BookingResponseDTO> result = bookingService
+                            .findBookingsByUser("rejected", 2L, 0, 10);
+                });
+        assertNotNull(e);
     }
 
     @Test
     void findBookingsByUserStateWaitingTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-
-        List<BookingResponseDTO> result = bookingService
-                .findBookingsByUser("waiting", 2L, 0, 10);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        Exception e = assertThrows(NotFoundException.class,
+                () -> {
+                    List<BookingResponseDTO> result = bookingService
+                            .findBookingsByUser("waiting", 2L, 0, 10);
+                });
+        assertNotNull(e);
     }
 
     @Test
     void findBookingsByUserStateCurrentTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-
-        List<BookingResponseDTO> result = bookingService
-                .findBookingsByUser("current", 2L, 0, 10);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        Exception e = assertThrows(NotFoundException.class,
+                () -> {
+                    List<BookingResponseDTO> result = bookingService
+                            .findBookingsByUser("current", 2L, 0, 10);
+                });
+        assertNotNull(e);
     }
 
     @Test
     void findBookingsByUserStateFutureTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        List<BookingResponseDTO> result = bookingService
-                .findBookingsByUser("future", 2L, 0, 10);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        Exception e = assertThrows(NotFoundException.class,
+                () -> {
+                    bookingService.findBookingsByUser("future", 2L, 0, 10);
+                });
+        assertNotNull(e);
     }
 
     @Test
     void findBookingsByUserStatePastTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        List<BookingResponseDTO> result = bookingService
-                .findBookingsByUser("past", 2L, 0, 10);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        Exception e = assertThrows(NotFoundException.class,
+                () -> {
+                    List<BookingResponseDTO> result = bookingService
+                            .findBookingsByUser("past", 2L, 0, 10);
+                });
+        assertNotNull(e);
     }
 
     @Test
     void findBookingsByUserStateAllTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(bookingRepository.findByBooker(any(User.class), any(PageRequest.class)))
+        when(bookingRepository.findByBooker(any(), any()))
                 .thenReturn((List.of(booking)));
 
         List<BookingResponseDTO> result = bookingService
@@ -320,10 +319,10 @@ class BookingServiceTest {
     @Test
     void findBookingsByUserUnknownStatusTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(bookingRepository.findByBooker(any(User.class), any(PageRequest.class)))
+        when(bookingRepository.findByBooker(any(), any()))
                 .thenReturn(List.of(booking));
 
         Exception e = assertThrows(UnknownBookingException.class,
@@ -336,10 +335,10 @@ class BookingServiceTest {
     @Test
     void findBookingsByItemsOwnerStateRejectedTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(bookingRepository.findByItemOwner(any(User.class), any(PageRequest.class)))
+        when(bookingRepository.findByItemOwner(any(), any()))
                 .thenReturn(Collections.singletonList(booking));
 
         List<BookingResponseDTO> result = bookingService
@@ -352,10 +351,10 @@ class BookingServiceTest {
     @Test
     void findBookingsByItemsOwnerStateWaitingTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(bookingRepository.findByItemOwner(any(User.class), any(PageRequest.class)))
+        when(bookingRepository.findByItemOwner(any(), any()))
                 .thenReturn(Collections.singletonList(booking));
 
         List<BookingResponseDTO> result = bookingService
@@ -368,10 +367,10 @@ class BookingServiceTest {
     @Test
     void findBookingsByItemsOwnerStateCurrentTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(bookingRepository.findByItemOwner(any(User.class), any(PageRequest.class)))
+        when(bookingRepository.findByItemOwner(any(), any()))
                 .thenReturn(Collections.singletonList(booking));
 
         List<BookingResponseDTO> result = bookingService
@@ -384,10 +383,10 @@ class BookingServiceTest {
     @Test
     void findBookingsByItemsOwnerStateFutureTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(bookingRepository.findByItemOwner(any(User.class), any(PageRequest.class)))
+        when(bookingRepository.findByItemOwner(any(), any()))
                 .thenReturn(Collections.singletonList(booking));
 
         List<BookingResponseDTO> result = bookingService
@@ -400,10 +399,10 @@ class BookingServiceTest {
     @Test
     void findBookingsByItemsOwnerStatePastTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(bookingRepository.findByItemOwner(any(User.class), any(PageRequest.class)))
+        when(bookingRepository.findByItemOwner(any(), any()))
                 .thenReturn(Collections.singletonList(booking));
 
         List<BookingResponseDTO> result = bookingService
@@ -416,10 +415,10 @@ class BookingServiceTest {
     @Test
     void findBookingsByItemsOwnerStateAllTest() {
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
-        when(bookingRepository.findByItemOwner(any(User.class), any(PageRequest.class)))
+        when(bookingRepository.findByItemOwner(any(), any()))
                 .thenReturn(Collections.singletonList(booking));
 
         List<BookingResponseDTO> result = bookingService

@@ -22,12 +22,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.practicum.shareit.booking.BookingStatus.WAITING;
-import static org.hamcrest.Matchers.is;
 
 @WebMvcTest(BookingController.class)
 @AutoConfigureMockMvc
@@ -264,9 +264,9 @@ public class BookingControllerTest {
                 .thenReturn(List.of(responseDto));
 
         mvc.perform(get("/bookings/owner")
-                .header(USER_ID_HEADER, ID)
-                .param(FROM_PARAM, FROM_VALUE)
-                .param(SIZE_PARAM, "-1"))
+                        .header(USER_ID_HEADER, ID)
+                        .param(FROM_PARAM, FROM_VALUE)
+                        .param(SIZE_PARAM, "-1"))
                 .andDo(print())
                 .andExpect(status().is4xxClientError());
     }

@@ -2,17 +2,14 @@ package ru.practicum.shareit.itemrequest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.itemrequest.dto.ItemRequestDTO;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
 
 class ItemRequestMapperTest {
 
@@ -23,10 +20,7 @@ class ItemRequestMapperTest {
 
     @BeforeEach
     public void init() {
-
-
         User requestor = new User(1L, "mame", "user@email.com");
-
         request = new ItemRequest(1L, "description", requestor.getId(), CREATED_DATE);
 
         requestDto = ItemRequestDTO.builder()

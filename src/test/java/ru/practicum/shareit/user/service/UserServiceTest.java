@@ -29,7 +29,7 @@ public class UserServiceTest {
     private UserDTO userDTO;
 
     @BeforeEach
-    public void beforeEach() {
+    public void init() {
         userRepository = mock(UserRepository.class);
         userService = new UserServiceImpl(userRepository);
 
@@ -44,7 +44,7 @@ public class UserServiceTest {
     void createUserTest() {
         userDTO = UserMapper.toUserDTO(user);
 
-        when(userRepository.save(any(User.class)))
+        when(userRepository.save(any()))
                 .thenReturn(user);
 
         UserDTO savedDto = userService.createUser(userDTO);
@@ -54,7 +54,8 @@ public class UserServiceTest {
         assertEquals(user.getName(), savedDto.getName());
         assertEquals(user.getEmail(), savedDto.getEmail());
 
-        verify(userRepository, times(1)).save(any(User.class));
+        verify(userRepository, times(1))
+                .save(any());
     }
 
     @Test
@@ -63,10 +64,10 @@ public class UserServiceTest {
 
         userDTO = UserMapper.toUserDTO(user);
 
-        when(userRepository.save(any(User.class)))
+        when(userRepository.save(any()))
                 .thenReturn(user);
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
 
         UserDTO savedDto = userService.updateUser(ID, userDTO);
@@ -76,14 +77,15 @@ public class UserServiceTest {
         assertEquals(userDTO.getName(), savedDto.getName());
         assertEquals(userDTO.getEmail(), savedDto.getEmail());
 
-        verify(userRepository, times(1)).save(any(User.class));
+        verify(userRepository, times(1))
+                .save(any());
     }
 
     @Test
     void findUserByIdTest() {
         userDTO = UserMapper.toUserDTO(user);
 
-        when(userRepository.findById(any(Long.class)))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
 
         UserDTO savedDto = userService.findUserById(ID);
@@ -93,14 +95,16 @@ public class UserServiceTest {
         assertEquals(userDTO.getName(), savedDto.getName());
         assertEquals(userDTO.getEmail(), savedDto.getEmail());
 
-        verify(userRepository, times(1)).findById(any(Long.class));
+        verify(userRepository, times(1))
+                .findById(anyLong());
     }
 
     @Test
     void deleteUserByIdTest() {
         userService.deleteUserById(ID);
 
-        verify(userRepository, times(1)).deleteById(ID);
+        verify(userRepository, times(1))
+                .deleteById(ID);
     }
 
     @Test
@@ -115,6 +119,7 @@ public class UserServiceTest {
         assertEquals(1, dtoList.size());
         assertEquals(user.getId(), dtoList.get(0).getId());
 
-        verify(userRepository, times(1)).findAll();
+        verify(userRepository, times(1))
+                .findAll();
     }
 }
