@@ -157,7 +157,7 @@ class BookingServiceTest {
         when(bookingRepository.save(any()))
                 .thenReturn(booking);
 
-        BookingResponseDTO result = bookingService.updateBooking(1l, true, 3L);
+        BookingResponseDTO result = bookingService.updateBooking(1L, true, 3L);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
@@ -174,7 +174,7 @@ class BookingServiceTest {
 
         Exception e = assertThrows(NotFoundException.class,
                 () -> {
-                    bookingService.updateBooking(1l, true, 2l);
+                    bookingService.updateBooking(1L, true, 2L);
                 });
         assertNotNull(e);
     }

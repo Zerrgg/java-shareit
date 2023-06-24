@@ -48,7 +48,7 @@ class IntegrationItemRequestServiceTest {
             .name("Test requestor")
             .email("requestor@email.ru")
             .build();
-    ;
+
     private ItemDTO itemDto = ItemDTO.builder()
             .name("name")
             .description("description")
@@ -102,7 +102,7 @@ class IntegrationItemRequestServiceTest {
     }
 
     @Test
-    void GetOtherUsersItemRequestsTest() {
+    void findAllOtherUsersItemRequestsTest() {
         UserDTO owner = userService.createUser(ownerDto);
         UserDTO owner2 = userService.createUser(owner2Dto);
         UserDTO requestor = userService.createUser(requestorDto);

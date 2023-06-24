@@ -51,7 +51,7 @@ class IntegrationItemServiceTest {
             .name("Test booker")
             .email("booker@email.ru")
             .build();
-    ;
+
     private ItemDTO itemDto = ItemDTO.builder()
             .name("name")
             .description("description")
