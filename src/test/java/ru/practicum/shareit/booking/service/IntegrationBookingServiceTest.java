@@ -94,7 +94,7 @@ class IntegrationBookingServiceTest {
     }
 
     @Test
-    void CreateBookingForOwnerTest() {
+    void createBookingForOwnerTest() {
         userRepository.save(owner);
         itemRepository.save(item);
 
@@ -107,7 +107,7 @@ class IntegrationBookingServiceTest {
     }
 
     @Test
-    void CreateBookingAvailableFalseTest() {
+    void createBookingAvailableFalseTest() {
         userRepository.save(owner);
         item.setAvailable(false);
         itemRepository.save(item);
