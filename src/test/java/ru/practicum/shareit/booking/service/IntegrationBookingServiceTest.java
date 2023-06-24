@@ -77,7 +77,7 @@ class IntegrationBookingServiceTest {
     }
 
     @Test
-    void CreateBookingTest() {
+    void createBookingTest() {
         userRepository.save(owner);
         itemRepository.save(item);
         userRepository.save(booker);
