@@ -132,7 +132,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
     public List<ItemDTO> findItemsByRequest(String text, int from, int size) {
         if (!StringUtils.hasText(text)) {
             return Collections.emptyList();
