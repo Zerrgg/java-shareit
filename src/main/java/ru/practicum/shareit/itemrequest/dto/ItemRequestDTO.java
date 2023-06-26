@@ -1,24 +1,25 @@
-package ru.practicum.shareit.user.dto;
+package ru.practicum.shareit.itemrequest.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.exception.markers.Create;
-import ru.practicum.shareit.exception.markers.Update;
+import ru.practicum.shareit.item.dto.ItemShortDTO;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
+public class ItemRequestDTO {
     private Long id;
     @NotBlank(groups = {Create.class})
-    private String name;
-    @Email(groups = {Create.class, Update.class})
-    @NotBlank(groups = {Create.class})
-    private String email;
+    private String description;
+    private List<ItemShortDTO> items;
+    private LocalDateTime created;
+    private Long requestorId;
 }

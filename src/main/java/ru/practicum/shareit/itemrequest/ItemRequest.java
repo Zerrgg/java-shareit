@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.itemrequest;
 
 import lombok.*;
 
@@ -22,8 +22,8 @@ public class ItemRequest {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "requester")
-    private Long requester;
+    @Column(name = "requestor_id")
+    private Long requestorId;
 
     @Column(name = "created")
     private LocalDateTime created;

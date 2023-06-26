@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.exception.markers.Create;
 
 import javax.validation.constraints.FutureOrPresent;
@@ -25,5 +26,5 @@ public class BookingDTO {
     @FutureOrPresent(groups = {Create.class})
     private LocalDateTime end;
     private Long bookerId;
-    private String status;
+    private BookingStatus status;
 }

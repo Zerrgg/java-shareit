@@ -1,7 +1,8 @@
 package ru.practicum.shareit.item.service.impl;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -14,27 +15,31 @@ import ru.practicum.shareit.comment.Comment;
 import ru.practicum.shareit.comment.CommentMapper;
 import ru.practicum.shareit.comment.dto.CommentDTO;
 import ru.practicum.shareit.comment.repository.CommentRepository;
-import ru.practicum.shareit.exception.ValidateCommentException;
 import ru.practicum.shareit.exception.DeniedAccessException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.ItemMapper;
-import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.exception.ValidateCommentException;
 import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemDTO;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static ru.practicum.shareit.comment.CommentMapper.*;
+import static ru.practicum.shareit.item.ItemMapper.*;
 
 @Slf4j
 @Service
-@AllArgsConstructor
-
+@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
@@ -46,9 +51,9 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public ItemDTO createItem(ItemDTO itemDTO, Long userId) {
         User owner = checkUser(userId);
-        Item item = ItemMapper.toItem(itemDTO, owner);
+        Item item = toItem(itemDTO, owner);
         item = itemRepository.save(item);
-        return ItemMapper.toItemDTO(item);
+        return toItemDTO(item);
     }
 
     @Override
@@ -65,11 +70,11 @@ public class ItemServiceImpl implements ItemService {
                             userId, item.getId()));
         }
 
-        Item updatedItem = ItemMapper.toItem(itemDTO, owner);
+        Item updatedItem = toItem(itemDTO, owner);
         updatedItem.setId(itemId);
-        List<CommentDTO> comments = CommentMapper.toDTOList(commentRepository.findAllByItemOrderByIdAsc(item));
+        List<CommentDTO> comments = toDTOList(commentRepository.findAllByItemOrderByIdAsc(item));
         updatedItem = itemRepository.save(refreshItem(updatedItem));
-        return ItemMapper.toItemDTO(updatedItem, comments);
+        return toItemWithCommentsDTO(updatedItem, comments);
     }
 
     @Override
@@ -78,7 +83,7 @@ public class ItemServiceImpl implements ItemService {
         checkUser(userId);
         Item item = checkItem(itemId);
 
-        List<CommentDTO> comments = CommentMapper.toDTOList(commentRepository.findAllByItemOrderByIdAsc(item));
+        List<CommentDTO> comments = toDTOList(commentRepository.findAllByItemOrderByIdAsc(item));
 
         List<Booking> bookings = bookingRepository.findAllByItemAndStatusOrderByStartAsc(item, BookingStatus.APPROVED);
         List<BookingDTO> bookingDTOList = bookings
@@ -89,21 +94,22 @@ public class ItemServiceImpl implements ItemService {
         boolean trueOwner = item.getOwner().getId().equals(userId);
 
         if (trueOwner) {
-            return ItemMapper.toItemDTO(
+            return toItemWithBookingDTO(
                     item,
                     getLastBooking(bookingDTOList),
                     getNextBooking(bookingDTOList),
                     comments);
         }
 
-        return ItemMapper.toItemDTO(item, comments);
+        return toItemWithCommentsDTO(item, comments);
     }
 
     @Override
     @Transactional
-    public List<ItemDTO> findAllItemsByUserId(Long userId) {
+    public List<ItemDTO> findAllItemsByUserId(Long userId, int from, int size) {
         checkUser(userId);
-        List<Item> userItems = itemRepository.findAllByOwnerId(userId);
+        PageRequest pageRequest = PageRequest.of(from / size, size);
+        List<Item> userItems = itemRepository.findAllByOwnerId(userId, pageRequest);
         Map<Long, List<CommentDTO>> comments = commentRepository.findByItemIn(userItems)
                 .stream()
                 .map(CommentMapper::toCommentDTO)
@@ -116,7 +122,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(groupingBy(BookingDTO::getItemId, toList()));
         return userItems
                 .stream()
-                .map(item -> ItemMapper.toItemDTO(
+                .map(item -> toItemWithBookingDTO(
                         item,
                         getLastBooking(bookings.get(item.getId())),
                         getNextBooking(bookings.get(item.getId())),
@@ -126,14 +132,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
-    public List<ItemDTO> findItemsByRequest(String text, Long userId) {
-        checkUser(userId);
+    public List<ItemDTO> findItemsByRequest(String text, int from, int size) {
         if (!StringUtils.hasText(text)) {
             return Collections.emptyList();
         }
-
-        return itemRepository.search(text)
+        PageRequest pageRequest = PageRequest.of(from / size, size);
+        return itemRepository.search(text, pageRequest)
                 .stream()
                 .map(ItemMapper::toItemDTO)
                 .collect(toList());
@@ -174,10 +178,10 @@ public class ItemServiceImpl implements ItemService {
             log.warn("Нельзя оставить комментарий на предмет с Id: {}", itemId);
             throw new ValidateCommentException(String.format("Нельзя оставить комментарий на предмет с Id: %d", itemId));
         }
-        Comment comment = CommentMapper.toComment(commentDTO, item, author);
+        Comment comment = toComment(commentDTO, item, author);
         comment.setCreated(LocalDateTime.now());
         comment = commentRepository.save(comment);
-        return CommentMapper.toCommentDTO(comment);
+        return toCommentDTO(comment);
     }
 
     private Item checkItem(Long itemId) {

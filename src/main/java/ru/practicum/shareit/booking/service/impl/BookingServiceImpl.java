@@ -1,16 +1,19 @@
-package ru.practicum.shareit.booking.service;
+package ru.practicum.shareit.booking.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.State;
-import ru.practicum.shareit.booking.dto.BookingResponseDTO;
 import ru.practicum.shareit.booking.dto.BookingDTO;
+import ru.practicum.shareit.booking.dto.BookingResponseDTO;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnknownBookingException;
 import ru.practicum.shareit.exception.ValidateBookingException;
@@ -25,6 +28,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static ru.practicum.shareit.booking.BookingMapper.toBooking;
+import static ru.practicum.shareit.booking.BookingMapper.toBookingResponseDTO;
 import static ru.practicum.shareit.booking.BookingStatus.REJECTED;
 import static ru.practicum.shareit.booking.BookingStatus.WAITING;
 
@@ -66,9 +71,9 @@ public class BookingServiceImpl implements BookingService {
                             item.getId()));
         }
 
-        Booking booking = BookingMapper.toBooking(bookingDTO, item, user);
+        Booking booking = toBooking(bookingDTO, item, user);
         booking = bookingRepository.save(booking);
-        return BookingMapper.toBookingResponseDTO(booking);
+        return toBookingResponseDTO(booking);
     }
 
     @Override
@@ -95,7 +100,7 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setStatus(status);
         booking = bookingRepository.save(booking);
-        return BookingMapper.toBookingResponseDTO(booking);
+        return toBookingResponseDTO(booking);
     }
 
     @Override
@@ -114,23 +119,31 @@ public class BookingServiceImpl implements BookingService {
                     String.format("Пользователь с Id: %d не является владельцем предмета c Id: %d или брони c Id: %d",
                             userId, booking.getItem().getId(), booking.getId()));
         }
-        return BookingMapper.toBookingResponseDTO(booking);
+        return toBookingResponseDTO(booking);
     }
 
     @Override
     @Transactional
-    public List<BookingResponseDTO> findBookingsByUser(String stateValue, Long userId) {
+    public List<BookingResponseDTO> findBookingsByUser(String stateValue, Long userId, int from, int size) {
         User owner = checkUser(userId);
-        List<Booking> ownerBookings = bookingRepository.findByBooker(owner);
+        PageRequest pageRequest = PageRequest.of(from / size, size, Sort.by("start").descending());
+        List<Booking> ownerBookings = bookingRepository.findByBooker(owner, pageRequest);
+        if (ownerBookings.isEmpty()) {
+            throw new NotFoundException("Бронирование не найдено");
+        }
         State bookings = parseState(stateValue);
         return getBookingByState(ownerBookings, bookings);
     }
 
     @Override
     @Transactional
-    public List<BookingResponseDTO> findBookingsByItemsOwner(String stateValue, Long userId) {
+    public List<BookingResponseDTO> findBookingsByItemsOwner(String stateValue, Long userId, int from, int size) {
         User owner = checkUser(userId);
-        List<Booking> ownerBookings = bookingRepository.findByItemOwner(owner);
+        PageRequest pageRequest = PageRequest.of(from / size, size, Sort.by("start").descending());
+        List<Booking> ownerBookings = bookingRepository.findByItemOwner(owner, pageRequest);
+        if (ownerBookings.isEmpty()) {
+            throw new NotFoundException("Бронирование не найдено");
+        }
         State bookings = parseState(stateValue);
         return getBookingByState(ownerBookings, bookings);
     }
@@ -164,7 +177,7 @@ public class BookingServiceImpl implements BookingService {
 
     private State parseState(String stateValue) {
         try {
-            return State.valueOf(stateValue);
+            return State.valueOf(stateValue.toUpperCase());
         } catch (Exception e) {
             log.warn("Некорректно переданный статус-state: {}", stateValue);
             throw new UnknownBookingException(String.format("Unknown state: %s", stateValue));
@@ -174,7 +187,6 @@ public class BookingServiceImpl implements BookingService {
     private List<BookingResponseDTO> getBookingByState(List<Booking> bookingList, State state) {
         LocalDateTime now = LocalDateTime.now();
         Stream<Booking> bookings = bookingList.stream();
-
         switch (state) {
             case REJECTED:
                 bookings = bookings.filter(booking -> booking.getStatus().equals(REJECTED));
