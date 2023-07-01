@@ -66,7 +66,7 @@ class ItemRepositoryTest {
     @Test
     void findAllByOwnerIdTest() {
         PageRequest pageRequest = PageRequest.of(0, 10);
-        List<Item> result = itemRepository.findAllByOwnerId(itemOwner.getId(), pageRequest);
+        List<Item> result = itemRepository.findAllByOwnerIdOrderByIdAsc(itemOwner.getId(), pageRequest);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());

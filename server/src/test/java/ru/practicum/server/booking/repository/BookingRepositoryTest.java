@@ -100,7 +100,7 @@ class BookingRepositoryTest {
         booking.setStatus(APPROVED);
         bookingRepository.save(booking);
 
-        List<Item> userItems = itemRepository.findAllByOwnerId(user.getId(), PageRequest.of(0, 1));
+        List<Item> userItems = itemRepository.findAllByOwnerIdOrderByIdAsc(user.getId(), PageRequest.of(0, 1));
 
         assertThat(bookingRepository
                 .findAllByItemInAndStatusOrderByStartAsc(userItems, APPROVED).size(), equalTo(1));

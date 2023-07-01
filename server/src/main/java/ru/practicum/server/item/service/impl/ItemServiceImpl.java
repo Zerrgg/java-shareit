@@ -107,7 +107,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDTO> findAllItemsByUserId(Long userId, int from, int size) {
         checkUser(userId);
         PageRequest pageRequest = PageRequest.of(from / size, size);
-        List<Item> userItems = itemRepository.findAllByOwnerId(userId, pageRequest);
+        List<Item> userItems = itemRepository.findAllByOwnerIdOrderByIdAsc(userId, pageRequest);
         Map<Long, List<CommentDTO>> comments = commentRepository.findByItemIn(userItems)
                 .stream()
                 .map(CommentMapper::toCommentDTO)

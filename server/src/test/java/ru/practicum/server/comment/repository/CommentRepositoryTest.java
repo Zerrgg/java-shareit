@@ -84,7 +84,7 @@ class CommentRepositoryTest {
     @Test
     void findByItemInTest() {
         PageRequest pageRequest = PageRequest.of(0, 10);
-        List<Item> userItems = itemRepository.findAllByOwnerId(itemOwner.getId(), pageRequest);
+        List<Item> userItems = itemRepository.findAllByOwnerIdOrderByIdAsc(itemOwner.getId(), pageRequest);
         List<Comment> result = commentRepository.findByItemIn(userItems);
 
         assertNotNull(result);
