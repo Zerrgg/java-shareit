@@ -14,7 +14,6 @@ import ru.practicum.server.itemrequest.ItemRequestMapper;
 import ru.practicum.server.itemrequest.dto.ItemRequestDTO;
 import ru.practicum.server.itemrequest.repository.ItemRequestRepository;
 import ru.practicum.server.itemrequest.service.ItemRequestService;
-import ru.practicum.server.user.User;
 import ru.practicum.server.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -87,8 +86,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .collect(Collectors.toList());
     }
 
-    private User checkUser(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> {
+    private void checkUser(Long userId) {
+        userRepository.findById(userId).orElseThrow(() -> {
                     log.warn("Не найден пользователь с id-{}: ", userId);
                     return new NotFoundException(String.format(
                             "Не найден пользователь с id: %d", userId));

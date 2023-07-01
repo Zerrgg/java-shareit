@@ -1,6 +1,7 @@
 package ru.practicum.server.exception;
 
 
+import lombok.Generated;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+@Generated
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler extends ResponseEntityExceptionHandler {
@@ -34,7 +36,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleDeniedAccessException(DeniedAccessException e) {
         log.debug("Отказано в доступе {}", e.getMessage());
-        return new ErrorResponse("Отказано в доступе", e.getMessage());
+        return new ErrorResponse("Отказано в доступе {}", e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
@@ -46,8 +48,8 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ValidateBookingException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleUnavailableBookingException(ValidateBookingException e) {
-        return new ErrorResponse("Ошибка бронирования 400: ", e.getMessage());
+    public ErrorResponse handleValidateBookingException(ValidateBookingException e) {
+        return new ErrorResponse("Ошибка бронирования 400: {}", e.getMessage());
     }
 
     @ExceptionHandler(UnknownBookingException.class)
@@ -59,7 +61,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ValidateCommentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleCommentException(ValidateCommentException e) {
-        return new ErrorResponse("Невозможно оставить комментарий 400: ", e.getMessage());
+        return new ErrorResponse("Невозможно оставить комментарий 400: {}", e.getMessage());
     }
 
 }
