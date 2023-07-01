@@ -25,7 +25,6 @@ import java.util.List;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.practicum.server.booking.BookingStatus.WAITING;
 
