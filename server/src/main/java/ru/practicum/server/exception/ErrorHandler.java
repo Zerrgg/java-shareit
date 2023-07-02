@@ -52,12 +52,6 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         return new ErrorResponse("Ошибка бронирования 400: ", e.getMessage());
     }
 
-    @ExceptionHandler(UnknownBookingException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleUnknownBookingException(UnknownBookingException e) {
-        return new ErrorResponse(e.getMessage());
-    }
-
     @ExceptionHandler(ValidateCommentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleCommentException(ValidateCommentException e) {

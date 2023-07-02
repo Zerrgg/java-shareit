@@ -25,20 +25,6 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(NotFoundException e) {
-        log.debug("Недопустимое значение {}", e.getMessage());
-        return new ErrorResponse("Недопустимое значение {}", e.getMessage());
-    }
-
-    @ExceptionHandler(DeniedAccessException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleDeniedAccessException(DeniedAccessException e) {
-        log.debug("Отказано в доступе {}", e.getMessage());
-        return new ErrorResponse("Отказано в доступе", e.getMessage());
-    }
-
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(Exception e) {
@@ -46,22 +32,10 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         return new ErrorResponse("Непредвиденная ошибка {}", e.getMessage());
     }
 
-    @ExceptionHandler(ValidateBookingException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleUnavailableBookingException(ValidateBookingException e) {
-        return new ErrorResponse("Ошибка бронирования 400: ", e.getMessage());
-    }
-
     @ExceptionHandler(UnknownBookingException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleUnknownBookingException(UnknownBookingException e) {
         return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler(ValidateCommentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleCommentException(ValidateCommentException e) {
-        return new ErrorResponse("Невозможно оставить комментарий 400: ", e.getMessage());
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

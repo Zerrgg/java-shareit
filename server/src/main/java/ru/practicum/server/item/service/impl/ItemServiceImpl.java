@@ -131,9 +131,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDTO> findItemsByRequest(String text, int from, int size) {
-        if (!StringUtils.hasText(text)) {
-            return Collections.emptyList();
-        }
         PageRequest pageRequest = PageRequest.of(from / size, size);
         return itemRepository.search(text, pageRequest)
                 .stream()

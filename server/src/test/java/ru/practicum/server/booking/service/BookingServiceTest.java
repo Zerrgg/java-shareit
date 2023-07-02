@@ -10,7 +10,6 @@ import ru.practicum.server.booking.dto.BookingResponseDTO;
 import ru.practicum.server.booking.repository.BookingRepository;
 import ru.practicum.server.booking.service.impl.BookingServiceImpl;
 import ru.practicum.server.exception.NotFoundException;
-import ru.practicum.server.exception.UnknownBookingException;
 import ru.practicum.server.exception.ValidateBookingException;
 import ru.practicum.server.item.Item;
 import ru.practicum.server.item.repository.ItemRepository;
@@ -314,22 +313,6 @@ class BookingServiceTest {
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
-    }
-
-    @Test
-    void findBookingsByUserUnknownStatusTest() {
-
-        when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(user));
-
-        when(bookingRepository.findByBooker(any(), any()))
-                .thenReturn(List.of(booking));
-
-        Exception e = assertThrows(UnknownBookingException.class,
-                () -> {
-                    bookingService.findBookingsByUser("Unknown", 2L, 0, 10);
-                });
-        assertNotNull(e);
     }
 
     @Test

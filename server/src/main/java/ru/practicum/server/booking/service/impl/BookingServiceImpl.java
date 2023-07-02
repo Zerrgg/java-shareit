@@ -15,7 +15,6 @@ import ru.practicum.server.booking.dto.BookingResponseDTO;
 import ru.practicum.server.booking.repository.BookingRepository;
 import ru.practicum.server.booking.service.BookingService;
 import ru.practicum.server.exception.NotFoundException;
-import ru.practicum.server.exception.UnknownBookingException;
 import ru.practicum.server.exception.ValidateBookingException;
 import ru.practicum.server.item.Item;
 import ru.practicum.server.item.repository.ItemRepository;
@@ -127,7 +126,7 @@ public class BookingServiceImpl implements BookingService {
         if (ownerBookings.isEmpty()) {
             throw new NotFoundException("Бронирование не найдено");
         }
-        State bookings = parseState(stateValue);
+        State bookings = State.valueOf(stateValue.toUpperCase());
         return getBookingByState(ownerBookings, bookings);
     }
 
@@ -140,7 +139,7 @@ public class BookingServiceImpl implements BookingService {
         if (ownerBookings.isEmpty()) {
             throw new NotFoundException("Бронирование не найдено");
         }
-        State bookings = parseState(stateValue);
+        State bookings = State.valueOf(stateValue.toUpperCase());
         return getBookingByState(ownerBookings, bookings);
     }
 
@@ -169,15 +168,6 @@ public class BookingServiceImpl implements BookingService {
                             "Не найдено бронирование с id: %d", bookingId));
                 }
         );
-    }
-
-    private State parseState(String stateValue) {
-        try {
-            return State.valueOf(stateValue.toUpperCase());
-        } catch (Exception e) {
-            log.warn("Некорректно переданный статус-state: {}", stateValue);
-            throw new UnknownBookingException(String.format("Unknown state: %s", stateValue));
-        }
     }
 
     private List<BookingResponseDTO> getBookingByState(List<Booking> bookingList, State state) {

@@ -1,6 +1,5 @@
 package ru.practicum.gateway.user;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,7 +11,6 @@ import ru.practicum.gateway.user.dto.UserDTO;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 
-@Tag(name = "UserController", description = "Взаимодействие с пользователями")
 @RestController
 @RequestMapping(path = "/users")
 @Validated
